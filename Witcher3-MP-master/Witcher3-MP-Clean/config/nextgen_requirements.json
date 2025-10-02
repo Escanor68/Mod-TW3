@@ -1,0 +1,143 @@
+{
+  "nextgen_requirements": {
+    "visual_studio": {
+      "version": "2022",
+      "edition": "Community, Professional, or Enterprise",
+      "workloads": [
+        "Desktop development with C++",
+        "Game development with C++"
+      ],
+      "components": [
+        "MSVC v143 - VS 2022 C++ x64/x86 build tools",
+        "Windows 10/11 SDK (10.0.22621.0 or later)",
+        "CMake tools for Visual Studio",
+        "Git for Windows",
+        "GitHub extension for Visual Studio"
+      ]
+    },
+    "system_requirements": {
+      "os": "Windows 10/11 (64-bit)",
+      "ram": "8GB minimum, 16GB recommended",
+      "gpu": "NVIDIA RTX series or AMD RX 6000 series or later",
+      "cpu": "Intel i5-8400 or AMD Ryzen 5 2600 or better",
+      "storage": "2GB free space"
+    },
+    "nextgen_features": {
+      "ray_tracing": {
+        "required": "NVIDIA RTX 20 series or AMD RX 6000 series",
+        "recommended": "NVIDIA RTX 30/40 series or AMD RX 7000 series",
+        "api": "DirectX Raytracing (DXR)",
+        "driver_version": "Latest Game Ready or Adrenalin drivers"
+      },
+      "dlss": {
+        "required": "NVIDIA RTX 20 series or later",
+        "api": "NVIDIA DLSS SDK 2.0/3.0",
+        "driver_version": "Latest Game Ready drivers"
+      },
+      "fsr": {
+        "required": "Any DirectX 11/12 compatible GPU",
+        "api": "AMD FSR 2.0/3.0",
+        "driver_version": "Latest drivers"
+      },
+      "hdr": {
+        "required": "HDR10 compatible display",
+        "api": "Windows HDR API",
+        "display": "HDR10, HDR10+, or Dolby Vision"
+      },
+      "rtx": {
+        "required": "NVIDIA RTX 20 series or later",
+        "features": [
+          "RTX Reflections",
+          "RTX Shadows",
+          "RTX Global Illumination",
+          "RTX Ambient Occlusion",
+          "RTX Denoising",
+          "RTX Transparency",
+          "RTX Decals",
+          "RTX Particles",
+          "RTX Water",
+          "RTX Vegetation",
+          "RTX Weather",
+          "RTX Lighting",
+          "RTX Materials",
+          "RTX Textures"
+        ]
+      }
+    },
+    "network_optimization": {
+      "latency_target": "20ms",
+      "packet_loss_threshold": "1%",
+      "throughput_target": "2000 packets/second",
+      "compression": "enabled",
+      "batching": "enabled",
+      "prediction": "enabled"
+    },
+    "performance_targets": {
+      "ultra": {
+        "latency": "≤20ms",
+        "packet_loss": "≤0.5%",
+        "ray_tracing": "≥90%",
+        "dlss": "≥95%",
+        "fsr": "≥90%",
+        "hdr": "≥95%",
+        "rtx": "≥90%"
+      },
+      "high": {
+        "latency": "≤25ms",
+        "packet_loss": "≤1%",
+        "ray_tracing": "≥80%",
+        "dlss": "≥90%",
+        "fsr": "≥85%",
+        "hdr": "≥90%",
+        "rtx": "≥0%"
+      },
+      "medium": {
+        "latency": "≤30ms",
+        "packet_loss": "≤2%",
+        "ray_tracing": "≥0%",
+        "dlss": "≥0%",
+        "fsr": "≥80%",
+        "hdr": "≥85%",
+        "rtx": "≥0%"
+      },
+      "performance": {
+        "latency": "≤20ms",
+        "packet_loss": "≤1%",
+        "ray_tracing": "≥0%",
+        "dlss": "≥0%",
+        "fsr": "≥75%",
+        "hdr": "≥0%",
+        "rtx": "≥0%"
+      }
+    },
+    "installation_steps": [
+      "1. Download Visual Studio Community 2022 (free)",
+      "2. Select required workloads and components",
+      "3. Install Visual Studio",
+      "4. Open Witcher3-MP.vcxproj",
+      "5. Select Release x64 configuration",
+      "6. Build the project",
+      "7. Run Witcher3MP_NextGen.exe",
+      "8. The server will auto-detect The Witcher 3 Next-Gen",
+      "9. Apply optimal Next-Gen settings automatically"
+    ],
+    "troubleshooting": {
+      "common_issues": [
+        "Cannot open source file: Check include paths",
+        "Unresolved external symbol: Check library dependencies",
+        "MSB8020: Check Windows SDK installation",
+        "Ray Tracing not working: Check GPU and drivers",
+        "DLSS not working: Check RTX GPU and drivers",
+        "HDR not working: Check display and Windows HDR settings"
+      ],
+      "solutions": [
+        "Verify include directories in project properties",
+        "Add required libraries to Additional Dependencies",
+        "Install latest Windows SDK",
+        "Update GPU drivers to latest version",
+        "Enable HDR in Windows Display settings",
+        "Check GPU compatibility with Next-Gen features"
+      ]
+    }
+  }
+}

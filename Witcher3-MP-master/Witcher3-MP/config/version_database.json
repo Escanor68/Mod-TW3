@@ -1,0 +1,375 @@
+{
+  "game_versions": {
+    "1.32": {
+      "version": "1.32",
+      "build": "4.04",
+      "patch": "4.04",
+      "date": "2022-12-14",
+      "is_supported": true,
+      "is_stable": true,
+      "compatibility_score": 1.0,
+      "network_settings": {
+        "tcp_nodelay": true,
+        "nagle_algorithm": false,
+        "quick_ack": true,
+        "tcp_buffer_size": 32768,
+        "udp_buffer_size": 32768,
+        "max_packet_size": 512,
+        "compression_threshold": 256,
+        "max_batch_size": 5,
+        "max_batch_delay": 3,
+        "latency_target": 30.0,
+        "enable_compression": true,
+        "enable_batching": true,
+        "enable_prediction": true
+      },
+      "optimization_settings": {
+        "packet_prioritization": true,
+        "adaptive_optimization": true,
+        "real_time_adaptation": true,
+        "machine_learning": true,
+        "predictive_optimization": true,
+        "quality_of_service": true
+      },
+      "known_issues": [],
+      "recommended_settings": ["low_latency_mode"],
+      "performance_notes": "Best performance with low latency optimizations"
+    },
+    "1.31": {
+      "version": "1.31",
+      "build": "4.03",
+      "patch": "4.03",
+      "date": "2022-08-24",
+      "is_supported": true,
+      "is_stable": true,
+      "compatibility_score": 0.95,
+      "network_settings": {
+        "tcp_nodelay": true,
+        "nagle_algorithm": false,
+        "quick_ack": true,
+        "tcp_buffer_size": 32768,
+        "udp_buffer_size": 32768,
+        "max_packet_size": 512,
+        "compression_threshold": 256,
+        "max_batch_size": 5,
+        "max_batch_delay": 3,
+        "latency_target": 40.0,
+        "enable_compression": true,
+        "enable_batching": true,
+        "enable_prediction": false
+      },
+      "optimization_settings": {
+        "packet_prioritization": true,
+        "adaptive_optimization": true,
+        "real_time_adaptation": true,
+        "machine_learning": false,
+        "predictive_optimization": false,
+        "quality_of_service": true
+      },
+      "known_issues": ["Minor prediction issues", "Slight performance degradation"],
+      "recommended_settings": ["low_latency_mode"],
+      "performance_notes": "Good performance with minor prediction limitations"
+    },
+    "1.30": {
+      "version": "1.30",
+      "build": "4.02",
+      "patch": "4.02",
+      "date": "2022-05-11",
+      "is_supported": true,
+      "is_stable": false,
+      "compatibility_score": 0.85,
+      "network_settings": {
+        "tcp_nodelay": true,
+        "nagle_algorithm": false,
+        "quick_ack": false,
+        "tcp_buffer_size": 65536,
+        "udp_buffer_size": 65536,
+        "max_packet_size": 1024,
+        "compression_threshold": 512,
+        "max_batch_size": 10,
+        "max_batch_delay": 5,
+        "latency_target": 50.0,
+        "enable_compression": true,
+        "enable_batching": true,
+        "enable_prediction": false
+      },
+      "optimization_settings": {
+        "packet_prioritization": true,
+        "adaptive_optimization": true,
+        "real_time_adaptation": false,
+        "machine_learning": false,
+        "predictive_optimization": false,
+        "quality_of_service": false
+      },
+      "known_issues": ["Network stability issues", "Prediction not supported", "Higher latency"],
+      "recommended_settings": ["stability_mode"],
+      "performance_notes": "Use stability mode for best results"
+    },
+    "1.29": {
+      "version": "1.29",
+      "build": "4.01",
+      "patch": "4.01",
+      "date": "2022-02-15",
+      "is_supported": true,
+      "is_stable": false,
+      "compatibility_score": 0.75,
+      "network_settings": {
+        "tcp_nodelay": false,
+        "nagle_algorithm": true,
+        "quick_ack": false,
+        "tcp_buffer_size": 131072,
+        "udp_buffer_size": 131072,
+        "max_packet_size": 2048,
+        "compression_threshold": 1024,
+        "max_batch_size": 15,
+        "max_batch_delay": 10,
+        "latency_target": 75.0,
+        "enable_compression": true,
+        "enable_batching": true,
+        "enable_prediction": false
+      },
+      "optimization_settings": {
+        "packet_prioritization": false,
+        "adaptive_optimization": false,
+        "real_time_adaptation": false,
+        "machine_learning": false,
+        "predictive_optimization": false,
+        "quality_of_service": false
+      },
+      "known_issues": ["Major network issues", "High latency", "Packet loss", "No advanced features"],
+      "recommended_settings": ["high_throughput_mode"],
+      "performance_notes": "Use high throughput mode, expect higher latency"
+    },
+    "1.28": {
+      "version": "1.28",
+      "build": "4.00",
+      "patch": "4.00",
+      "date": "2021-12-20",
+      "is_supported": false,
+      "is_stable": false,
+      "compatibility_score": 0.50,
+      "network_settings": {
+        "tcp_nodelay": false,
+        "nagle_algorithm": true,
+        "quick_ack": false,
+        "tcp_buffer_size": 262144,
+        "udp_buffer_size": 262144,
+        "max_packet_size": 4096,
+        "compression_threshold": 2048,
+        "max_batch_size": 25,
+        "max_batch_delay": 15,
+        "latency_target": 100.0,
+        "enable_compression": false,
+        "enable_batching": false,
+        "enable_prediction": false
+      },
+      "optimization_settings": {
+        "packet_prioritization": false,
+        "adaptive_optimization": false,
+        "real_time_adaptation": false,
+        "machine_learning": false,
+        "predictive_optimization": false,
+        "quality_of_service": false
+      },
+      "known_issues": ["Not supported", "Major compatibility issues", "Very high latency", "No optimizations"],
+      "recommended_settings": ["legacy_mode"],
+      "performance_notes": "Legacy mode only, expect poor performance"
+    }
+  },
+  "network_profiles": {
+    "low_latency_mode": {
+      "name": "low_latency_mode",
+      "description": "Optimized for minimum latency",
+      "tcp_nodelay": true,
+      "nagle_algorithm": false,
+      "quick_ack": true,
+      "tcp_buffer_size": 32768,
+      "udp_buffer_size": 32768,
+      "max_packet_size": 512,
+      "compression_threshold": 256,
+      "max_batch_size": 5,
+      "max_batch_delay": 3,
+      "latency_target": 30.0,
+      "enable_compression": true,
+      "enable_batching": true,
+      "enable_prediction": true,
+      "advanced_settings": {
+        "tcp_cork": false,
+        "tcp_quickack": true,
+        "tcp_user_timeout": 3000,
+        "tcp_keepalive": true,
+        "tcp_keepidle": 1,
+        "tcp_keepintvl": 1,
+        "tcp_keepcnt": 3
+      }
+    },
+    "high_throughput_mode": {
+      "name": "high_throughput_mode",
+      "description": "Optimized for maximum throughput",
+      "tcp_nodelay": false,
+      "nagle_algorithm": true,
+      "quick_ack": false,
+      "tcp_buffer_size": 131072,
+      "udp_buffer_size": 131072,
+      "max_packet_size": 4096,
+      "compression_threshold": 1024,
+      "max_batch_size": 20,
+      "max_batch_delay": 10,
+      "latency_target": 100.0,
+      "enable_compression": true,
+      "enable_batching": true,
+      "enable_prediction": false,
+      "advanced_settings": {
+        "tcp_cork": true,
+        "tcp_quickack": false,
+        "tcp_user_timeout": 10000,
+        "tcp_keepalive": true,
+        "tcp_keepidle": 5,
+        "tcp_keepintvl": 5,
+        "tcp_keepcnt": 3
+      }
+    },
+    "stability_mode": {
+      "name": "stability_mode",
+      "description": "Optimized for maximum stability",
+      "tcp_nodelay": false,
+      "nagle_algorithm": true,
+      "quick_ack": true,
+      "tcp_buffer_size": 65536,
+      "udp_buffer_size": 65536,
+      "max_packet_size": 2048,
+      "compression_threshold": 512,
+      "max_batch_size": 10,
+      "max_batch_delay": 5,
+      "latency_target": 50.0,
+      "enable_compression": true,
+      "enable_batching": true,
+      "enable_prediction": false,
+      "advanced_settings": {
+        "tcp_cork": false,
+        "tcp_quickack": true,
+        "tcp_user_timeout": 5000,
+        "tcp_keepalive": true,
+        "tcp_keepidle": 3,
+        "tcp_keepintvl": 3,
+        "tcp_keepcnt": 3
+      }
+    },
+    "legacy_mode": {
+      "name": "legacy_mode",
+      "description": "Compatibility mode for older versions",
+      "tcp_nodelay": false,
+      "nagle_algorithm": true,
+      "quick_ack": false,
+      "tcp_buffer_size": 262144,
+      "udp_buffer_size": 262144,
+      "max_packet_size": 4096,
+      "compression_threshold": 2048,
+      "max_batch_size": 25,
+      "max_batch_delay": 15,
+      "latency_target": 100.0,
+      "enable_compression": false,
+      "enable_batching": false,
+      "enable_prediction": false,
+      "advanced_settings": {
+        "tcp_cork": true,
+        "tcp_quickack": false,
+        "tcp_user_timeout": 15000,
+        "tcp_keepalive": false,
+        "tcp_keepidle": 0,
+        "tcp_keepintvl": 0,
+        "tcp_keepcnt": 0
+      }
+    }
+  },
+  "compatibility_matrix": {
+    "1.32": {
+      "game_version": "1.32",
+      "server_version": "1.0.0",
+      "compatibility_score": 1.0,
+      "is_compatible": true,
+      "warnings": [],
+      "recommendations": ["Use low_latency_mode for best performance"],
+      "recommended_profile": "low_latency_mode"
+    },
+    "1.31": {
+      "game_version": "1.31",
+      "server_version": "1.0.0",
+      "compatibility_score": 0.95,
+      "is_compatible": true,
+      "warnings": ["Minor prediction issues"],
+      "recommendations": ["Use low_latency_mode", "Disable prediction if issues occur"],
+      "recommended_profile": "low_latency_mode"
+    },
+    "1.30": {
+      "game_version": "1.30",
+      "server_version": "1.0.0",
+      "compatibility_score": 0.85,
+      "is_compatible": true,
+      "warnings": ["Network stability issues", "Prediction not supported"],
+      "recommendations": ["Use stability_mode", "Monitor network performance"],
+      "recommended_profile": "stability_mode"
+    },
+    "1.29": {
+      "game_version": "1.29",
+      "server_version": "1.0.0",
+      "compatibility_score": 0.75,
+      "is_compatible": true,
+      "warnings": ["Major network issues", "High latency expected"],
+      "recommendations": ["Use high_throughput_mode", "Expect higher latency"],
+      "recommended_profile": "high_throughput_mode"
+    },
+    "1.28": {
+      "game_version": "1.28",
+      "server_version": "1.0.0",
+      "compatibility_score": 0.50,
+      "is_compatible": false,
+      "warnings": ["Not supported", "Major compatibility issues"],
+      "recommendations": ["Use legacy_mode", "Upgrade game version"],
+      "recommended_profile": "legacy_mode"
+    }
+  },
+  "version_detection": {
+    "methods": [
+      "registry",
+      "file_system",
+      "process_info",
+      "config_files"
+    ],
+    "registry_paths": [
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\GOG.com\\Games\\1207664643",
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Steam\\Apps\\292030"
+    ],
+    "file_paths": [
+      "C:\\Program Files (x86)\\Steam\\steamapps\\common\\The Witcher 3\\bin\\x64\\witcher3.exe",
+      "C:\\GOG Games\\The Witcher 3 Wild Hunt\\bin\\x64\\witcher3.exe"
+    ],
+    "config_files": [
+      "user.settings",
+      "gameplay.ini",
+      "version.txt"
+    ]
+  },
+  "performance_thresholds": {
+    "excellent": {
+      "max_latency": 30.0,
+      "max_packet_loss": 1.0,
+      "min_throughput": 1000
+    },
+    "good": {
+      "max_latency": 50.0,
+      "max_packet_loss": 3.0,
+      "min_throughput": 500
+    },
+    "acceptable": {
+      "max_latency": 100.0,
+      "max_packet_loss": 5.0,
+      "min_throughput": 250
+    },
+    "poor": {
+      "max_latency": 200.0,
+      "max_packet_loss": 10.0,
+      "min_throughput": 100
+    }
+  }
+}

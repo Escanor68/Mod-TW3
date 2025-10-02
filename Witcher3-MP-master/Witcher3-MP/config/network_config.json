@@ -1,0 +1,104 @@
+{
+  "network_optimization": {
+    "low_latency_mode": {
+      "enabled": true,
+      "tcp_nodelay": true,
+      "nagle_algorithm": false,
+      "quick_ack": true,
+      "tcp_buffer_size": 32768,
+      "udp_buffer_size": 32768,
+      "max_packet_size": 512,
+      "compression_threshold": 256
+    },
+    "throughput_mode": {
+      "enabled": false,
+      "tcp_nodelay": false,
+      "nagle_algorithm": true,
+      "quick_ack": false,
+      "tcp_buffer_size": 131072,
+      "udp_buffer_size": 131072,
+      "max_packet_size": 4096,
+      "compression_threshold": 1024
+    },
+    "stability_mode": {
+      "enabled": false,
+      "tcp_nodelay": false,
+      "nagle_algorithm": true,
+      "quick_ack": true,
+      "tcp_buffer_size": 65536,
+      "udp_buffer_size": 65536,
+      "max_packet_size": 2048,
+      "compression_threshold": 512
+    }
+  },
+  "packet_prioritization": {
+    "critical_priority": [
+      "position_updates",
+      "health_updates",
+      "combat_actions"
+    ],
+    "high_priority": [
+      "player_interactions",
+      "npc_actions",
+      "item_pickups"
+    ],
+    "normal_priority": [
+      "chat_messages",
+      "general_state",
+      "ui_updates"
+    ],
+    "low_priority": [
+      "background_updates",
+      "non_critical_data"
+    ]
+  },
+  "latency_optimization": {
+    "target_latency_ms": 50.0,
+    "max_latency_ms": 100.0,
+    "latency_measurement_interval": 5,
+    "adaptive_optimization": true,
+    "latency_logging": true,
+    "latency_threshold": 30.0
+  },
+  "bandwidth_management": {
+    "enable_bandwidth_limit": false,
+    "max_bandwidth_bytes_per_second": 0,
+    "compression_enabled": true,
+    "packet_batching": true,
+    "max_batch_size": 10,
+    "max_batch_delay_ms": 5
+  },
+  "connection_optimization": {
+    "max_connections": 100,
+    "connection_timeout": 30,
+    "keep_alive": true,
+    "keep_alive_interval": 1,
+    "keep_alive_probes": 3,
+    "socket_reuse": true,
+    "tcp_cork": false
+  },
+  "performance_monitoring": {
+    "enable_stats": true,
+    "stats_interval_seconds": 30,
+    "log_performance": true,
+    "log_network_stats": true,
+    "log_latency_stats": true,
+    "performance_threshold_ms": 10.0
+  },
+  "quality_of_service": {
+    "enable_qos": true,
+    "max_packet_loss_percent": 5.0,
+    "min_connection_quality": 0.8,
+    "auto_kick_high_latency": true,
+    "high_latency_threshold_ms": 200.0,
+    "connection_quality_window": 100
+  },
+  "advanced_features": {
+    "packet_prediction": true,
+    "client_side_prediction": true,
+    "server_side_reconciliation": true,
+    "lag_compensation": true,
+    "interpolation": true,
+    "extrapolation": true
+  }
+}
