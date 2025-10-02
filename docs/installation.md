@@ -19,7 +19,7 @@
 ### 1. Compilar el Proyecto
 ```bash
 # Opción 1: Script automático
-run_mod.bat build
+witcher3_mp.bat build
 
 # Opción 2: Manual
 cd scripts
