@@ -232,4 +232,4 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 
 ---
 
-*Última actualización: 19 de Diciembre, 2024*
+*Última actualización: 02 de Octubre, 2025*
