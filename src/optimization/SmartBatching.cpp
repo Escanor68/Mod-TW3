@@ -8,7 +8,7 @@ namespace Optimization
 {
     // SmartBatching implementation
     SmartBatching::SmartBatching()
-        : m_initialized(false), m_accumulatedTime(0.0f), m_currentInterval(100.0f),
+        : m_initialized(false), m_config(), m_stats(), m_accumulatedTime(0.0f), m_currentInterval(100.0f),
           m_networkCongestion(0.0f), m_networkLatency(0.0f), m_adaptiveBatchingEnabled(true),
           m_nextBatchId(1)
     {
@@ -438,7 +438,7 @@ namespace Optimization
             batch.messages.clear();
             PrioritizedMessage compressedMessage;
             compressedMessage.messageId = batch.batchId;
-            compressedMessage.type = Networking::MessageTypes::TC_BatchData;
+            compressedMessage.type = Networking::MessageTypes::BatchMessage;
             compressedMessage.data = compressedData;
             compressedMessage.classification.priority = batch.highestPriority;
             compressedMessage.classification.urgency = batch.highestUrgency;
@@ -1001,7 +1001,19 @@ namespace Optimization
             }
             
             // This would need to be calculated based on original vs compressed size
-            return 0.5f; // Placeholder
+            // Calculate actual batching efficiency based on message characteristics
+            if (m_stats.totalMessages == 0)
+            {
+                return 0.0f;
+            }
+
+            float compressionRatio = static_cast<float>(m_stats.compressedBytes) / static_cast<float>(m_stats.totalBytes);
+            float batchUtilization = static_cast<float>(m_stats.totalMessages) / static_cast<float>(m_stats.totalBatches);
+            float droppedRatio = static_cast<float>(m_stats.droppedBatches) / static_cast<float>(m_stats.totalBatches);
+
+            // Efficiency = compression ratio * batch utilization * (1 - drop ratio)
+            float efficiency = compressionRatio * batchUtilization * (1.0f - droppedRatio);
+            return std::max(0.0f, std::min(1.0f, efficiency));
         }
 
         size_t CalculateBatchSize(const BatchedMessage& batch)
@@ -1072,7 +1084,7 @@ namespace Optimization
             LOG_INFO("Total size: " + std::to_string(batch.totalSize) + " bytes");
             LOG_INFO("Highest priority: " + std::to_string(static_cast<int>(batch.highestPriority)));
             LOG_INFO("Highest urgency: " + std::to_string(static_cast<int>(batch.highestUrgency)));
-            LOG_INFO("Compressed: " + (batch.isCompressed ? "Yes" : "No"));
+            LOG_INFO("Compressed: " + std::string(batch.isCompressed ? "Yes" : "No"));
             LOG_INFO("Efficiency: " + std::to_string(CalculateBatchEfficiency(batch) * 100.0f) + "%");
             LOG_INFO("===================");
         }

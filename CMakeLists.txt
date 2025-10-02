@@ -64,10 +64,14 @@ set(OPTIMIZATION_SOURCES
     src/optimization/DataCompression.cpp
     src/optimization/MovementPrediction.cpp
     src/optimization/MessagePrioritySystem.cpp
+    src/optimization/MessagePrioritySystemImpl.cpp
     src/optimization/SmartBatching.cpp
+    src/optimization/SmartBatchingImpl.cpp
     src/optimization/OptimizedNetworkProtocol.cpp
     src/optimization/PositionInterpolation.cpp
     src/optimization/NetworkOptimizer.cpp
+    src/optimization/NetworkOptimizerImpl.cpp
+    src/optimization/DynamicNetworkOptimizer.cpp
     src/optimization/CombatOptimizer.cpp
 )
 
@@ -93,6 +97,7 @@ set(UTILS_SOURCES
 
 set(VERSION_SOURCES
     src/version/VersionManager.cpp
+    src/version/VersionManagerImpl.cpp
     src/version/DynamicVersionManager.cpp
     src/version/NextGenVersionManager.cpp
 )

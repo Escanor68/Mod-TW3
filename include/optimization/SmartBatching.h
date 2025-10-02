@@ -23,20 +23,25 @@ namespace Optimization
     // Batch configuration
     struct BatchConfig
     {
-        BatchType type = BatchType::Interval;
-        float intervalMs = 100.0f;           // Interval for time-based batching
-        size_t maxSize = 1024;               // Maximum size for size-based batching
-        size_t maxMessages = 50;             // Maximum messages per batch
-        bool enableCompression = true;       // Enable compression for batches
-        bool enablePriorityGrouping = true;  // Group messages by priority
-        float maxWaitTime = 500.0f;          // Maximum time to wait before sending
-        bool enableAdaptiveBatching = true;  // Adaptive batching based on network conditions
+        BatchConfig() : type(BatchType::Interval), intervalMs(100.0f), maxSize(1024), maxMessages(50),
+                       enableCompression(true), enablePriorityGrouping(true), maxWaitTime(500.0f),
+                       enableAdaptiveBatching(true), minIntervalMs(16.0f), maxIntervalMs(200.0f),
+                       congestionThreshold(0.8f), adaptationSpeed(0.1f) {}
+        
+        BatchType type;
+        float intervalMs;           // Interval for time-based batching
+        size_t maxSize;             // Maximum size for size-based batching
+        size_t maxMessages;         // Maximum messages per batch
+        bool enableCompression;     // Enable compression for batches
+        bool enablePriorityGrouping; // Group messages by priority
+        float maxWaitTime;          // Maximum time to wait before sending
+        bool enableAdaptiveBatching; // Adaptive batching based on network conditions
         
         // Adaptive batching parameters
-        float minIntervalMs = 16.0f;         // Minimum interval (60 FPS)
-        float maxIntervalMs = 200.0f;        // Maximum interval
-        float congestionThreshold = 0.8f;    // Network congestion threshold
-        float adaptationSpeed = 0.1f;        // How fast to adapt to network conditions
+        float minIntervalMs;        // Minimum interval (60 FPS)
+        float maxIntervalMs;        // Maximum interval
+        float congestionThreshold;  // Network congestion threshold
+        float adaptationSpeed;      // How fast to adapt to network conditions
     };
 
     // Batched message
@@ -57,16 +62,20 @@ namespace Optimization
     // Batch statistics
     struct BatchStats
     {
-        uint32_t totalBatches = 0;
-        uint32_t totalMessages = 0;
-        uint32_t compressedBatches = 0;
-        uint32_t droppedBatches = 0;
-        size_t totalBytes = 0;
-        size_t compressedBytes = 0;
-        float averageBatchSize = 0.0f;
-        float averageBatchTime = 0.0f;
-        float compressionRatio = 0.0f;
-        float averageLatency = 0.0f;
+        BatchStats() : totalBatches(0), totalMessages(0), compressedBatches(0), droppedBatches(0),
+                      totalBytes(0), compressedBytes(0), averageBatchSize(0.0f), averageBatchTime(0.0f),
+                      compressionRatio(0.0f), averageLatency(0.0f) {}
+        
+        uint32_t totalBatches;
+        uint32_t totalMessages;
+        uint32_t compressedBatches;
+        uint32_t droppedBatches;
+        size_t totalBytes;
+        size_t compressedBytes;
+        float averageBatchSize;
+        float averageBatchTime;
+        float compressionRatio;
+        float averageLatency;
         
         void Reset()
         {

@@ -1,7 +1,20 @@
 #include "utils/ConsoleCommands.h"
 #include "utils/Logger.h"
+#include "utils/ConfigManager.h"
+#include "networking/NetworkLogger.h"
+#include "optimization/DataCompression.h"
+// #include "game/PlayerManager.h"
+// #include "game/QuestManager.h"
+// #include "game/InventoryManager.h"
+// #include "game/NetworkManager.h"
+// #include "utils/PerformanceMonitor.h"
 #include <iostream>
 #include <iomanip>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <functional>
+#include <iterator>
 
 // Initialize all mod-specific console commands
 void InitializeModConsoleCommands()
@@ -116,12 +129,12 @@ void InitializeModConsoleCommands()
             else if (subcommand == "status")
             {
                 std::cout << "\n=== Logging Status ===\n";
-                std::cout << "File logging: " << (logger.m_fileLogging ? "Enabled" : "Disabled") << "\n";
-                std::cout << "Console logging: " << (logger.m_consoleLogging ? "Enabled" : "Disabled") << "\n";
-                std::cout << "Buffered logging: " << (logger.m_bufferedLogging ? "Enabled" : "Disabled") << "\n";
-                std::cout << "Log file: " << logger.m_logFile << "\n";
-                std::cout << "Buffer size: " << logger.m_bufferSize << "\n";
-                std::cout << "Performance logging: " << (logger.m_performanceLogging ? "Enabled" : "Disabled") << "\n";
+                std::cout << "File logging: Enabled (placeholder)\n";
+                std::cout << "Console logging: Enabled (placeholder)\n";
+                std::cout << "Buffered logging: Disabled (placeholder)\n";
+                std::cout << "Log file: logs/mp_session.log (placeholder)\n";
+                std::cout << "Buffer size: 1000 (placeholder)\n";
+                std::cout << "Performance logging: Disabled (placeholder)\n";
                 std::cout << "\n";
             }
             else
@@ -136,10 +149,16 @@ void InitializeModConsoleCommands()
         [](const std::vector<std::string>& args) {
             std::cout << "\n=== Witcher3-MP Status ===\n";
             std::cout << "Session: Active\n";
-            std::cout << "Connected Players: 0\n"; // TODO: Get from actual player manager
-            std::cout << "Active Quests: 0\n"; // TODO: Get from quest manager
-            std::cout << "Network Status: Connected\n"; // TODO: Get from network manager
-            std::cout << "Performance: Good\n"; // TODO: Get from performance monitor
+            // Get real data from managers (temporarily disabled)
+            // auto& playerManager = PlayerManager::GetInstance();
+            // auto& questManager = QuestManager::GetInstance();
+            // auto& networkManager = Networking::NetworkManager::GetInstance();
+            // auto& performanceMonitor = Utils::PerformanceMonitor::GetInstance();
+            
+            std::cout << "Connected Players: 0 (placeholder)\n";
+            std::cout << "Active Quests: 0 (placeholder)\n";
+            std::cout << "Network Status: Connected (placeholder)\n";
+            std::cout << "Performance: Good (placeholder)\n";
             std::cout << "\n";
             
             LOG_INFO_CAT(LogCategory::SYSTEM, "Status command executed");
@@ -160,10 +179,24 @@ void InitializeModConsoleCommands()
             if (subcommand == "list")
             {
                 std::cout << "\n=== Active Quests ===\n";
-                std::cout << "No active quests found.\n"; // TODO: Get from quest manager
+                // auto& questManager = QuestManager::GetInstance();
+                // auto activeQuests = questManager.GetActiveQuests();
+                std::vector<std::string> activeQuests; // Placeholder
+                if (activeQuests.empty())
+                {
+                    std::cout << "No active quests found.\n";
+                }
+                else
+                {
+                    std::cout << "Active Quests:\n";
+                    for (const auto& quest : activeQuests)
+                    {
+                        std::cout << "  - " << quest << " (placeholder)\n";
+                    }
+                }
                 std::cout << "\n";
                 
-                LOG_QUEST_EVENT("SYSTEM", "Quest list requested", "");
+                LOG_INFO_CAT(LogCategory::SYSTEM, "Quest list requested");
             }
             else if (subcommand == "start")
             {
@@ -175,7 +208,7 @@ void InitializeModConsoleCommands()
                 
                 std::string questId = args[1];
                 std::cout << "Starting quest: " << questId << "\n";
-                LOG_QUEST_EVENT(questId, "Quest started", "");
+                LOG_INFO_CAT(LogCategory::SYSTEM, "Quest started: " + questId);
             }
             else if (subcommand == "complete")
             {
@@ -187,12 +220,12 @@ void InitializeModConsoleCommands()
                 
                 std::string questId = args[1];
                 std::cout << "Completing quest: " << questId << "\n";
-                LOG_QUEST_EVENT(questId, "Quest completed", "");
+                LOG_INFO_CAT(LogCategory::SYSTEM, "Quest completed: " + questId);
             }
             else if (subcommand == "sync")
             {
                 std::cout << "Syncing quest state with all players...\n";
-                LOG_QUEST_EVENT("SYSTEM", "Quest state sync initiated", "");
+                LOG_INFO_CAT(LogCategory::SYSTEM, "Quest state sync initiated");
             }
             else
             {
@@ -216,17 +249,18 @@ void InitializeModConsoleCommands()
             if (subcommand == "sync")
             {
                 std::cout << "Syncing inventory with all players...\n";
-                LOG_INVENTORY_SYNC("SYSTEM", "ALL", "Full sync initiated");
+                LOG_INFO_CAT(LogCategory::SYSTEM, "Inventory full sync initiated");
             }
             else if (subcommand == "status")
             {
                 std::cout << "\n=== Inventory Sync Status ===\n";
-                std::cout << "Last sync: Never\n"; // TODO: Get from inventory manager
-                std::cout << "Pending items: 0\n"; // TODO: Get from inventory manager
-                std::cout << "Sync errors: 0\n"; // TODO: Get from inventory manager
+                // auto& inventoryManager = InventoryManager::GetInstance();
+                std::cout << "Last sync: Never (placeholder)\n";
+                std::cout << "Pending items: 0 (placeholder)\n";
+                std::cout << "Sync errors: 0 (placeholder)\n";
                 std::cout << "\n";
                 
-                LOG_INVENTORY_SYNC("SYSTEM", "STATUS", "Status requested");
+                LOG_INFO_CAT(LogCategory::SYSTEM, "Inventory status requested");
             }
             else if (subcommand == "debug")
             {
@@ -265,25 +299,33 @@ void InitializeModConsoleCommands()
             if (subcommand == "status")
             {
                 std::cout << "\n=== Network Status ===\n";
-                std::cout << "Connection: Active\n"; // TODO: Get from network manager
-                std::cout << "Latency: 25ms\n"; // TODO: Get from network manager
-                std::cout << "Packet loss: 0.1%\n"; // TODO: Get from network manager
-                std::cout << "Throughput: 1.2 MB/s\n"; // TODO: Get from network manager
+                auto& networkManager = Networking::NetworkManager::GetInstance();
+                auto& networkLogger = Networking::NetworkLogger::GetInstance();
+                // auto stats = networkLogger.GetNetworkStats(); // Placeholder
+                
+                std::cout << "Connection: " << (networkManager.IsConnected() ? "Active" : "Inactive") << "\n";
+                std::cout << "Latency: 50ms (placeholder)\n";
+                std::cout << "Packet loss: 0.1% (placeholder)\n";
+                std::cout << "Throughput: 1.5 MB/s (placeholder)\n";
                 std::cout << "\n";
                 
-                LOG_NETWORK_EVENT("Status requested", "");
+                LOG_INFO_CAT(LogCategory::NETWORK, "Network status requested");
             }
             else if (subcommand == "stats")
             {
                 std::cout << "\n=== Network Statistics ===\n";
-                std::cout << "Packets sent: 0\n"; // TODO: Get from network manager
-                std::cout << "Packets received: 0\n"; // TODO: Get from network manager
-                std::cout << "Bytes sent: 0\n"; // TODO: Get from network manager
-                std::cout << "Bytes received: 0\n"; // TODO: Get from network manager
-                std::cout << "Connection time: 0s\n"; // TODO: Get from network manager
+                auto& networkManager = Networking::NetworkManager::GetInstance();
+                auto& networkLogger = Networking::NetworkLogger::GetInstance();
+                // auto stats = networkLogger.GetNetworkStats(); // Placeholder
+                
+                std::cout << "Packets sent: " << networkManager.GetPacketsSent() << "\n";
+                std::cout << "Packets received: " << networkManager.GetPacketsReceived() << "\n";
+                std::cout << "Bytes sent: 1024000 (placeholder)\n";
+                std::cout << "Bytes received: 1024000 (placeholder)\n";
+                std::cout << "Connection time: " << networkManager.GetConnectionTime() << "s\n";
                 std::cout << "\n";
                 
-                LOG_NETWORK_EVENT("Statistics requested", "");
+                LOG_INFO_CAT(LogCategory::NETWORK, "Network statistics requested");
             }
             else if (subcommand == "debug")
             {

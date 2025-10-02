@@ -11,12 +11,56 @@ Player::Player(uint32_t id, const Vector4F& position, float health, uint8_t char
 
 void Player::Update()
 {
-    // Player update logic
-    // This could include movement, health regeneration, etc.
+    // Update player position based on input
+    if (m_inputManager)
+    {
+        Vector4F input = m_inputManager->GetMovementInput();
+        m_position.x += input.x * m_speed * 0.016f; // Assuming 60 FPS
+        m_position.y += input.y * m_speed * 0.016f;
+        m_position.z += input.z * m_speed * 0.016f;
+    }
+
+    // Update animation state
+    if (m_animationManager)
+    {
+        m_animationManager->Update(0.016f);
+    }
+
+    // Update combat state
+    if (m_combatState != CombatState::Idle)
+    {
+        UpdateCombatState();
+    }
+
+    // Update network sync
+    if (m_networkSync)
+    {
+        m_networkSync->UpdatePosition(m_position);
+    }
 }
 
 void Player::Render()
 {
-    // Player rendering logic
-    // This would typically be handled by the game engine
+    // Render player model
+    if (m_model)
+    {
+        m_model->SetPosition(m_position);
+        m_model->SetRotation(m_rotation);
+        m_model->Render();
+    }
+
+    // Render health bar
+    if (m_healthBar)
+    {
+        m_healthBar->SetValue(m_health / m_maxHealth);
+        m_healthBar->Render();
+    }
+
+    // Render name tag
+    if (m_nameTag)
+    {
+        m_nameTag->SetText(m_name);
+        m_nameTag->SetPosition(Vector4F{m_position.x, m_position.y + 2.0f, m_position.z, 1.0f});
+        m_nameTag->Render();
+    }
 }

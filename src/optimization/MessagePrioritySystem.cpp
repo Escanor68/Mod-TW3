@@ -565,7 +565,68 @@ namespace Optimization
     void NetworkTrafficManager::DropLowPriorityMessages()
     {
         // This would implement dropping low priority messages during congestion
-        // For now, it's a placeholder
+        // Calculate priority based on message characteristics
+        float priority = 0.0f;
+        
+        // Base priority from message type
+        switch (messageType)
+        {
+            case MessageType::ClientConnect:
+            case MessageType::ClientDisconnect:
+                priority = 1.0f; // Highest priority
+                break;
+            case MessageType::PlayerAttack:
+            case MessageType::PlayerDefend:
+                priority = 0.9f; // High priority
+                break;
+            case MessageType::PlayerMove:
+                priority = 0.7f; // Medium-high priority
+                break;
+            case MessageType::PlayerUpdate:
+                priority = 0.5f; // Medium priority
+                break;
+            case MessageType::ChatMessage:
+                priority = 0.3f; // Low priority
+                break;
+            default:
+                priority = 0.5f; // Default medium priority
+                break;
+        }
+
+        // Adjust priority based on age
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto age = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - timestamp).count();
+        
+        if (age > 100) // 100ms old
+        {
+            priority *= 0.8f; // Reduce priority for old messages
+        }
+        else if (age > 50) // 50ms old
+        {
+            priority *= 0.9f; // Slightly reduce priority
+        }
+
+        // Adjust priority based on size
+        if (size > 1024) // Large message
+        {
+            priority *= 0.9f; // Slightly reduce priority for large messages
+        }
+        else if (size < 64) // Small message
+        {
+            priority *= 1.1f; // Increase priority for small messages
+        }
+
+        // Adjust priority based on network conditions
+        if (m_networkConditions.latency > 100) // High latency
+        {
+            priority *= 1.1f; // Increase priority to compensate
+        }
+        else if (m_networkConditions.packetLoss > 0.05f) // High packet loss
+        {
+            priority *= 1.2f; // Increase priority significantly
+        }
+
+        return std::max(0.0f, std::min(1.0f, priority));
         LOG_DEBUG("Dropping low priority messages due to congestion");
     }
 
