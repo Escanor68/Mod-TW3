@@ -6,12 +6,23 @@ echo    Desinstalando Mod de The Witcher 3...
 echo ========================================
 echo.
 
-REM Usar la ruta conocida de The Witcher 3
-set "TW3_PATH=E:\SteamLibrary\steamapps\common\The Witcher 3"
+REM Detectar automáticamente la ubicación de The Witcher 3
+set "TW3_PATH="
 
-if not exist "%TW3_PATH%\bin\x64\witcher3.exe" (
-    echo ERROR: The Witcher 3 not found at expected location!
-    echo Expected: %TW3_PATH%
+REM Buscar en ubicaciones comunes de Steam
+if exist "C:\Program Files (x86)\Steam\steamapps\common\The Witcher 3" set "TW3_PATH=C:\Program Files (x86)\Steam\steamapps\common\The Witcher 3"
+if exist "E:\SteamLibrary\steamapps\common\The Witcher 3" set "TW3_PATH=E:\SteamLibrary\steamapps\common\The Witcher 3"
+if exist "D:\SteamLibrary\steamapps\common\The Witcher 3" set "TW3_PATH=D:\SteamLibrary\steamapps\common\The Witcher 3"
+if exist "F:\SteamLibrary\steamapps\common\The Witcher 3" set "TW3_PATH=F:\SteamLibrary\steamapps\common\The Witcher 3"
+
+if not defined TW3_PATH (
+    echo ERROR: The Witcher 3 installation not found!
+    echo Please ensure The Witcher 3 is installed via Steam.
+    echo Searched locations:
+    echo   - C:\Program Files (x86)\Steam\steamapps\common\The Witcher 3
+    echo   - E:\SteamLibrary\steamapps\common\The Witcher 3
+    echo   - D:\SteamLibrary\steamapps\common\The Witcher 3
+    echo   - F:\SteamLibrary\steamapps\common\The Witcher 3
     pause
     exit /b 1
 )

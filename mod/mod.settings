@@ -1,0 +1,8 @@
+[mod]
+name = "Witcher3-MP Multiplayer Server"
+version = "1.0.0"
+author = "Witcher3-MP Team"
+description = "Multiplayer server mod for The Witcher 3: Wild Hunt Next-Gen"
+compatibility = "4.0+"
+priority = 1000
+config_file = "witcher3_mp_config.xml"

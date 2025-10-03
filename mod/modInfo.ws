@@ -23,3 +23,9 @@ config_file = "witcher3_mp_config.xml"
 - The Witcher 3: Wild Hunt Next-Gen (v4.0+)
 - REDkit (for development)
 - Windows 10/11 (64-bit)
+
+[hooks]
+- OnGameStart: Initialize mod when game starts
+- OnLevelLoaded: Initialize mod when level loads
+- OnPlayerSpawn: Initialize player features
+- OnGameUpdate: Keep mod active during gameplay

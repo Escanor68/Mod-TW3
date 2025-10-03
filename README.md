@@ -7,12 +7,22 @@ Un sistema de multiplayer cooperativo completo que permite a hasta 4 jugadores e
 ## 🚀 Inicio Rápido
 
 ### Requisitos
+
+#### Windows
 - **The Witcher 3: Wild Hunt** (versión Next-Gen 4.0+)
 - **Visual Studio 2022** (Community, Professional o Enterprise)
 - **Windows 10/11** (64-bit)
 
+#### Linux
+- **The Witcher 3: Wild Hunt** (versión Next-Gen 4.0+)
+- **Ubuntu 20.04+**, **Debian 11+**, **Arch Linux**, **Fedora 35+**, etc.
+- **GCC 9.0+** o **Clang 10.0+**
+- **CMake 3.16+**
+- **Steam** funcionando correctamente
+
 ### Instalación en 3 Pasos
 
+#### Windows
 ```bash
 # 1. Compilar el proyecto
 witcher3_mp.bat build
@@ -22,6 +32,24 @@ witcher3_mp.bat install
 
 # 3. Ejecutar el mod
 witcher3_mp.bat start
+```
+
+#### Linux
+```bash
+# 1. Instalación automática (recomendado)
+chmod +x install_linux.sh
+./install_linux.sh
+
+# O instalación manual:
+# 1. Instalar dependencias
+./witcher3_mp.sh deps
+
+# 2. Compilar e instalar
+./witcher3_mp.sh build
+./witcher3_mp.sh install
+
+# 3. Ejecutar servidor
+./witcher3_mp.sh start
 ```
 
 ¡Y listo! El servidor se iniciará automáticamente y The Witcher 3 se abrirá con el mod cargado.
