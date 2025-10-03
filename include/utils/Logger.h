@@ -17,7 +17,7 @@ enum class LogLevel : int
     DEBUG = 0,
     INFO = 1,
     WARNING = 2,
-    ERROR = 3,
+    ERROR_LEVEL = 3,
     CRITICAL = 4
 };
 
@@ -133,7 +133,7 @@ private:
     std::vector<bool> m_enabledCategories;
     
     // Performance tracking
-    std::chrono::high_resolution_clock::time_point m_performanceStart;
+    std::chrono::time_point<std::chrono::steady_clock> m_performanceStart;
     std::vector<std::pair<std::string, double>> m_performanceData;
     
     static Logger* s_instance;

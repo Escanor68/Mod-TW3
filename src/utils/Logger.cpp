@@ -171,7 +171,7 @@ void Logger::Warning(LogCategory category, const std::string& message, const std
 
 void Logger::Error(LogCategory category, const std::string& message, const std::string& source)
 {
-    Log(LogLevel::ERROR, category, message, source);
+    Log(LogLevel::ERROR_LEVEL, category, message, source);
 }
 
 void Logger::Critical(LogCategory category, const std::string& message, const std::string& source)
@@ -254,7 +254,7 @@ void Logger::SetLogLevelFromString(const std::string& level)
     else if (lowerLevel == "warning")
         SetLogLevel(LogLevel::WARNING);
     else if (lowerLevel == "error")
-        SetLogLevel(LogLevel::ERROR);
+        SetLogLevel(LogLevel::ERROR_LEVEL);
     else if (lowerLevel == "critical")
         SetLogLevel(LogLevel::CRITICAL);
     else
@@ -278,7 +278,7 @@ void Logger::StartPerformanceLogging()
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     m_performanceLogging = true;
-    m_performanceStart = std::chrono::high_resolution_clock::now();
+    m_performanceStart = std::chrono::steady_clock::now();
     m_performanceData.clear();
     LOG_INFO_CAT(LogCategory::SYSTEM, "Performance logging started");
 }
@@ -317,7 +317,7 @@ std::string Logger::GetLevelString(LogLevel level)
         case LogLevel::DEBUG: return "DEBUG";
         case LogLevel::INFO: return "INFO";
         case LogLevel::WARNING: return "WARNING";
-        case LogLevel::ERROR: return "ERROR";
+        case LogLevel::ERROR_LEVEL: return "ERROR";
         case LogLevel::CRITICAL: return "CRITICAL";
         default: return "UNKNOWN";
     }

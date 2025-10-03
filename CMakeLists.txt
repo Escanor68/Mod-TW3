@@ -24,8 +24,12 @@ endif()
 
 # Find required packages for TW3 Next-Gen
 find_package(ZLIB REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LZ4 REQUIRED liblz4)
+find_package(lz4 CONFIG REQUIRED)
+
+# Set vcpkg toolchain if available
+if(DEFINED ENV{VCPKG_ROOT})
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+endif()
 
 # Add Catch2 for testing
 include(FetchContent)

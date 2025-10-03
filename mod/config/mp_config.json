@@ -1,99 +1,15 @@
 {
-  "mod_info": {
-    "name": "Witcher3-MP",
-    "version": "1.0.0",
-    "author": "Witcher3-MP Team",
-    "description": "Sistema de multiplayer avanzado para The Witcher 3: Wild Hunt",
-    "compatibility": {
-      "min_version": "4.0.0",
-      "max_version": "4.0.999",
-      "platforms": ["PC"]
-    }
-  },
   "server": {
+    "ip": "127.0.0.1",
     "port": 60000,
     "max_connections": 4,
     "timeout": 30,
     "keep_alive": true,
-    "auto_start": true,
-    "game_mode": "coop_story",
-    "allow_quest_sharing": true,
-    "sync_progression": true
+    "auto_start": false
   },
-  "combat": {
-    "enable_critical_hits": true,
-    "damage_multiplier": 1.0,
-    "animation_sync": true,
-    "weapon_types": {
-      "fists": true,
-      "steel_sword": true,
-      "silver_sword": true,
-      "axe": true,
-      "mace": true,
-      "spear": true,
-      "crossbow": true,
-      "bow": true
-    },
-    "attack_types": {
-      "light": true,
-      "heavy": true,
-      "strong": true,
-      "combo": true,
-      "counter": true,
-      "finisher": true
-    },
-    "damage_types": {
-      "physical": true,
-      "slashing": true,
-      "piercing": true,
-      "blunt": true,
-      "fire": true,
-      "frost": true,
-      "lightning": true,
-      "poison": true
-    }
-  },
-  "network": {
-    "tcp_nodelay": true,
-    "compression": true,
-    "batching": true,
-    "packet_priority": true,
-    "latency_target": 30.0,
-    "packet_loss_threshold": 3.0
-  },
-  "optimization": {
-    "enable_dynamic_adaptation": true,
-    "enable_version_detection": true,
-    "enable_real_time_optimization": true,
-    "adaptation_interval": 30,
-    "performance_threshold": 0.8,
-    "memory_cleanup_interval": 60
-  },
-  "logging": {
-    "level": "INFO",
-    "enable_file_logging": true,
-    "log_file": "logs/mp_session.log",
-    "enable_console_logging": true,
-    "enable_buffered_logging": true,
-    "buffer_size": 1000,
-    "max_log_size": "10MB",
-    "max_log_files": 5,
-    "enable_performance_logging": false,
-    "categories": {
-      "general": true,
-      "network": true,
-      "combat": true,
-      "quest": true,
-      "inventory": true,
-      "dialog": true,
-      "player": true,
-      "system": true
-    }
-  },
-  "debug": {
-    "enable_debug_mode": false,
-    "enable_performance_monitoring": true,
-    "enable_network_debug": false,
-    "enable_combat_debug": false
+  "client": {
+    "server_ip": "127.0.0.1",
+    "server_port": 60002,
+    "auto_connect": true
   }
 }

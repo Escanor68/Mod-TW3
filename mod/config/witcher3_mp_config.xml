@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <name>Witcher3-MP Multiplayer Server</name>
+    <version>1.0.0</version>
+    <author>Witcher3-MP Team</author>
+    <description>Multiplayer server mod for The Witcher 3: Wild Hunt Next-Gen</description>
+    <compatibility>4.0+</compatibility>
+    <priority>1000</priority>
+    
+    <settings>
+        <category name="Server Settings">
+            <setting name="Server IP" type="string" default="127.0.0.1" description="IP address of the multiplayer server"/>
+            <setting name="Server Port" type="int" default="60000" min="1024" max="65535" description="Port number for the multiplayer server"/>
+            <setting name="Max Connections" type="int" default="4" min="1" max="16" description="Maximum number of players allowed"/>
+            <setting name="Auto Start Server" type="bool" default="false" description="Automatically start the server when the game launches"/>
+            <setting name="Keep Alive" type="bool" default="true" description="Enable keep-alive for network connections"/>
+            <setting name="Connection Timeout" type="int" default="30" min="5" max="300" description="Connection timeout in seconds"/>
+        </category>
+        
+        <category name="Client Settings">
+            <setting name="Auto Connect" type="bool" default="true" description="Automatically connect to server on game start"/>
+            <setting name="Client Server IP" type="string" default="127.0.0.1" description="IP address to connect to as client"/>
+            <setting name="Client Server Port" type="int" default="60002" min="1024" max="65535" description="Port number to connect to as client"/>
+        </category>
+        
+        <category name="Game Features">
+            <setting name="Enable Cooperative Quests" type="bool" default="true" description="Enable shared quest progression"/>
+            <setting name="Enable Shared Inventory" type="bool" default="true" description="Enable shared inventory system"/>
+            <setting name="Enable Synced Combat" type="bool" default="true" description="Enable synchronized combat system"/>
+            <setting name="Enable Exploration Mode" type="bool" default="true" description="Enable shared exploration mode"/>
+            <setting name="Enable Global Economy" type="bool" default="true" description="Enable shared economy system"/>
+        </category>
+        
+        <category name="Network Optimization">
+            <setting name="Enable Low Latency Mode" type="bool" default="true" description="Enable low latency network optimization"/>
+            <setting name="Enable Data Compression" type="bool" default="true" description="Enable network data compression"/>
+            <setting name="Enable Smart Batching" type="bool" default="true" description="Enable smart message batching"/>
+            <setting name="Enable Movement Prediction" type="bool" default="true" description="Enable client-side movement prediction"/>
+        </category>
+        
+        <category name="Debug Settings">
+            <setting name="Enable Debug Logging" type="bool" default="false" description="Enable detailed debug logging"/>
+            <setting name="Log Level" type="enum" default="INFO" values="DEBUG,INFO,WARNING,ERROR" description="Logging level"/>
+            <setting name="Enable Network Debug" type="bool" default="false" description="Enable network debugging information"/>
+        </category>
+    </settings>
+    
+    <ui>
+        <menu name="Witcher3-MP Settings" icon="mod_icon" description="Configure multiplayer mod settings">
+            <tab name="Server" category="Server Settings"/>
+            <tab name="Client" category="Client Settings"/>
+            <tab name="Features" category="Game Features"/>
+            <tab name="Network" category="Network Optimization"/>
+            <tab name="Debug" category="Debug Settings"/>
+        </menu>
+    </ui>
+    
+    <dependencies>
+        <mod name="Community Patch" version="4.0+" optional="true"/>
+    </dependencies>
+    
+    <conflicts>
+        <mod name="Fast Travel Anywhere" reason="May conflict with multiplayer synchronization"/>
+        <mod name="God Mode" reason="Disabled in multiplayer for balance"/>
+    </conflicts>
+</config>

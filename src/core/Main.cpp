@@ -3,7 +3,7 @@
 #include "networking/net_connection.h"
 #include "networking/net_client.h"
 #include "networking/net_server.h"
-#include "networking/PacketTypes.h"
+#include "networking/MessageTypes.h"
 
 #include "Common.h"
 #include <vector>
@@ -382,7 +382,7 @@ int main()
 	Logger& logger = Logger::GetInstance();
 	logger.SetFileLogging(true, "witcher3mp.log");
 	logger.SetConsoleLogging(true);
-	logger.SetLogLevel(1); // INFO level
+	logger.SetLogLevel(LogLevel::INFO); // INFO level
 
 	LOG_INFO("Starting Witcher3-MP Server...");
 

@@ -1,6 +1,7 @@
 // Witcher3-MP Mod Info
 // Compatible with The Witcher 3: Wild Hunt Next-Gen (v4.0+)
 // Created for multiplayer functionality
+// Updated for post-patch XML configuration support
 
 [mod]
 name = "Witcher3-MP Multiplayer Server"
@@ -9,6 +10,7 @@ author = "Witcher3-MP Team"
 description = "Multiplayer server mod for The Witcher 3: Wild Hunt Next-Gen"
 compatibility = "4.0+"
 priority = 1000
+config_file = "witcher3_mp_config.xml"
 
 [features]
 - Multiplayer server functionality
