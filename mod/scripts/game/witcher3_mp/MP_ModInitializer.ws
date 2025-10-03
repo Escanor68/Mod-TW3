@@ -33,6 +33,8 @@ function InitializeMod()
     InitializeServerManager();
     InitializeLogger();
     InitializeConfig();
+    InitializeGameModeManager();
+    InitializeQuestSystem();
 }
 
 // Initialize server manager
@@ -81,6 +83,40 @@ function InitializeConfig()
     if (g_debugEnabled)
     {
         Log("Configuration initialized successfully");
+    }
+}
+
+// Initialize game mode manager
+function InitializeGameModeManager()
+{
+    if (g_debugEnabled)
+    {
+        Log("Initializing Game Mode Manager...");
+    }
+    
+    // Initialize game mode manager
+    InitializeGameModeManager();
+    
+    if (g_debugEnabled)
+    {
+        Log("Game Mode Manager initialized successfully");
+    }
+}
+
+// Initialize quest system
+function InitializeQuestSystem()
+{
+    if (g_debugEnabled)
+    {
+        Log("Initializing Quest System...");
+    }
+    
+    // Initialize quest system
+    InitializeQuestSystem();
+    
+    if (g_debugEnabled)
+    {
+        Log("Quest System initialized successfully");
     }
 }
 

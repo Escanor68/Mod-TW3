@@ -155,6 +155,19 @@ namespace TW3Integration
         std::vector<uint32_t> GetConnectedPlayers() const;
         size_t GetPlayerCount() const;
 
+        // LAN Discovery functions
+        void InitializeLANDiscovery();
+        void StartLANDiscovery();
+        void StopLANDiscovery();
+        std::vector<struct ServerInfo> GetDiscoveredServers() const;
+
+        // IP Connection functions
+        void InitializeIPConnection();
+        bool ConnectToServer(const std::string& ip, uint16_t port, const std::string& username = "Player");
+        void DisconnectFromServer();
+        bool IsConnectedToServer() const;
+        void SendToServer(const std::string& message);
+
     private:
         TW3ModInterface();
         ~TW3ModInterface();
@@ -182,6 +195,10 @@ namespace TW3Integration
         bool m_initialized;
         bool m_modConnected;
         static TW3ModInterface* s_instance;
+
+        // Network components
+        class LANDiscovery* m_lanDiscovery;
+        class IPConnection* m_ipConnection;
     };
 
     // Helper functions for JSON serialization

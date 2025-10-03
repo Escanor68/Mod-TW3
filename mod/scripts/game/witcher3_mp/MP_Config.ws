@@ -1,19 +1,12 @@
 // Witcher3-MP Configuration System
 // Manages mod configuration and settings
-
-using game;
-using game::player;
-using game::quests;
-using game::ui;
-using game::inventory;
-using game::stats;
-using game::effects;
+// Compatible with The Witcher 3: Wild Hunt Next-Gen (v4.0+)
 
 // Configuration class for multiplayer mod
 class MP_Config
 {
-    private let m_configData: ref<inkHashMap>;
-    private let m_configPath: String;
+    private var m_configData: ref<inkHashMap>;
+    private var m_configPath: String;
     
     // Initialize configuration
     public func Initialize()

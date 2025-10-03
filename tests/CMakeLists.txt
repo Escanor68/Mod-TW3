@@ -2,7 +2,11 @@
 cmake_minimum_required(VERSION 3.16)
 
 # Find Catch2
-find_package(Catch2 3 REQUIRED)
+find_package(Catch2 3 QUIET)
+if(NOT Catch2_FOUND)
+    message(WARNING "Catch2 not found, tests will be disabled")
+    return()
+endif()
 
 # Test sources
 set(TEST_SOURCES
@@ -32,16 +36,25 @@ add_executable(Witcher3-MP-Tests ${TEST_SOURCES} ${PROJECT_SOURCES})
 # Link libraries
 target_link_libraries(Witcher3-MP-Tests 
     PRIVATE Catch2::Catch2WithMain
-    ZLIB::ZLIB
-    ${LZ4_LIBRARIES}
 )
+
+if(ZLIB_FOUND)
+    target_link_libraries(Witcher3-MP-Tests PRIVATE ZLIB::ZLIB)
+endif()
+
+if(lz4_FOUND)
+    target_link_libraries(Witcher3-MP-Tests PRIVATE ${LZ4_LIBRARIES})
+endif()
 
 # Include directories
 target_include_directories(Witcher3-MP-Tests PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/../Witcher3-MP/include
-    ${LZ4_INCLUDE_DIRS}
 )
+
+if(lz4_FOUND)
+    target_include_directories(Witcher3-MP-Tests PRIVATE ${LZ4_INCLUDE_DIRS})
+endif()
 
 # Add test to CTest
 include(CTest)

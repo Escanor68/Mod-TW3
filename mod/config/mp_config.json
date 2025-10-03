@@ -9,7 +9,40 @@
   },
   "client": {
     "server_ip": "127.0.0.1",
-    "server_port": 60002,
-    "auto_connect": true
+    "server_port": 60000,
+    "auto_connect": true,
+    "username": "Player",
+    "connection_mode": "LAN"
+  },
+  "ui": {
+    "show_mod_menu": true,
+    "menu_position": "main_menu",
+    "enable_lan_discovery": true,
+    "enable_ip_connection": true
+  },
+  "gameMode": {
+    "mode": "story",
+    "available_modes": ["story", "exploration"],
+    "story_mode": {
+      "enable_main_quests": true,
+      "enable_cutscenes": true,
+      "enable_dialogs": true,
+      "host_controls_decisions": true,
+      "sync_xp_rewards": true,
+      "sync_quest_progress": true
+    },
+    "exploration_mode": {
+      "enable_main_quests": false,
+      "enable_cutscenes": false,
+      "enable_dialogs": false,
+      "enable_witcher_contracts": true,
+      "enable_treasure_hunts": true,
+      "enable_question_marks": true,
+      "enable_dynamic_events": true,
+      "unlock_all_areas": true,
+      "sync_inventory": true,
+      "sync_contracts": true,
+      "save_external_progress": true
+    }
   }
 }

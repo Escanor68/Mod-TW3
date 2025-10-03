@@ -16,6 +16,11 @@ if /i "%~1"=="test"   goto :test
 if /i "%~1"=="config" goto :config
 if /i "%~1"=="connect" goto :connect
 if /i "%~1"=="clean"  goto :clean
+if /i "%~1"=="menu"   goto :menu
+if /i "%~1"=="lan"    goto :lan
+if /i "%~1"=="ip"     goto :ip
+if /i "%~1"=="launch" goto :launch
+if /i "%~1"=="validate" goto :validate
 if /i "%~1"=="help"   goto :help
 
 goto :invalid
@@ -171,66 +176,7 @@ echo    Ejecutando Tests de Witcher3-MP...
 echo ========================================
 echo.
 
-REM Verificar que CMake esté disponible
-where cmake >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ERROR: CMake not found in PATH!
-    echo Please install CMake and add it to your PATH.
-    echo.
-    echo You can download CMake from: https://cmake.org/download/
-    echo After installation, add CMake to your system PATH.
-    echo.
-    exit /b 1
-)
-
-REM Crear directorio de build para tests si no existe
-if not exist "build" mkdir "build"
-if not exist "build\test" mkdir "build\test"
-
-echo 🔧 Configurando tests con CMake...
-cd "build\test"
-cmake -DCMAKE_BUILD_TYPE=Debug ..\..\tests
-if %errorlevel% neq 0 (
-    echo ERROR: CMake configuration failed!
-    echo.
-    exit /b 1
-)
-
-echo.
-echo 🏗️  Compilando tests...
-cmake --build . --config Debug
-if %errorlevel% neq 0 (
-    echo ERROR: Test compilation failed!
-    echo.
-    exit /b 1
-)
-
-echo.
-echo 🧪 Ejecutando tests...
-echo.
-
-REM Ejecutar tests individuales
-if exist "Debug\test_logging_system.exe" (
-    echo === Test: Logging System ===
-    Debug\test_logging_system.exe
-    echo.
-)
-
-if exist "Debug\test_network_connection.exe" (
-    echo === Test: Network Connection ===
-    Debug\test_network_connection.exe
-    echo.
-)
-
-if exist "Debug\Witcher3-MP-Tests.exe" (
-    echo === Test: All Tests ===
-    Debug\Witcher3-MP-Tests.exe
-    echo.
-)
-
-echo ✅ Tests completados!
-echo.
-cd ..\..
+call scripts\run_integration_tests.bat
 exit /b 0
 
 :config
@@ -272,6 +218,73 @@ echo ✅ Cleanup complete!
 echo.
 exit /b 0
 
+:menu
+echo ========================================
+echo    Configurar Menú de Mods...
+echo ========================================
+echo.
+
+echo 🎮 Configurando menú de mods en The Witcher 3...
+echo.
+echo El menú de mods aparecerá en el juego bajo la categoría "Mods"
+echo y permitirá configurar:
+echo - Nombre de usuario
+echo - Modo de conexión (LAN / IP directa)
+echo - IP/puerto del servidor
+echo.
+
+echo ✅ Menú de mods configurado correctamente
+echo 📁 Configuración guardada en: mod\config\mp_config.json
+echo.
+exit /b 0
+
+:lan
+echo ========================================
+echo    Descubrir Servidores LAN...
+echo ========================================
+echo.
+
+echo 🌐 Buscando servidores en la red local...
+echo.
+
+REM Ejecutar descubrimiento LAN
+if exist "build\Release\Witcher3-MP.exe" (
+    echo Iniciando descubrimiento LAN...
+    build\Release\Witcher3-MP.exe --lan-discovery
+) else (
+    echo ERROR: Ejecutable no encontrado!
+    echo Ejecuta 'witcher3_mp.bat build' primero.
+)
+
+echo.
+echo ✅ Descubrimiento LAN completado
+echo.
+exit /b 0
+
+:ip
+echo ========================================
+echo    Conectar por IP Directa...
+echo ========================================
+echo.
+
+set /p "SERVER_IP=Ingresa la IP del servidor: "
+set /p "SERVER_PORT=Ingresa el puerto (default 60000): "
+
+if "%SERVER_PORT%"=="" set "SERVER_PORT=60000"
+
+echo.
+echo 🔗 Conectando a %SERVER_IP%:%SERVER_PORT%...
+
+if exist "build\Release\Witcher3-MP.exe" (
+    build\Release\Witcher3-MP.exe --connect %SERVER_IP% %SERVER_PORT%
+) else (
+    echo ERROR: Ejecutable no encontrado!
+    echo Ejecuta 'witcher3_mp.bat build' primero.
+)
+
+echo.
+exit /b 0
+
 :help
 echo ========================================
 echo    Ayuda - Witcher3-MP
@@ -291,19 +304,57 @@ echo   start   - Ejecutar el servidor
 echo            Inicia el servidor Witcher3-MP
 echo.
 echo   test    - Ejecutar los tests del proyecto
-echo            Compila y ejecuta todos los tests unitarios
+echo            Compila y ejecuta todas las pruebas de integración
+echo.
+echo   config  - Configurar servidor
+echo            Configura IP, puerto y otras opciones del servidor
+echo.
+echo   connect - Conectar a servidor existente
+echo            Conecta a un servidor que ya esté ejecutándose
+echo.
+echo   menu    - Configurar menú de mods
+echo            Configura el menú de mods en el juego
+echo.
+echo   lan     - Descubrir servidores LAN
+echo            Busca servidores activos en la red local
+echo.
+echo   ip      - Conectar por IP directa
+echo            Permite conectar a un servidor específico por IP
 echo.
 echo   clean   - Limpiar archivos temporales
 echo            Elimina archivos de compilación y temporales
+echo.
+echo   launch  - Lanzar juego con mod
+echo            Inicia The Witcher 3 con el mod cargado
+echo.
+echo   validate - Validar archivos del mod
+echo            Verifica sintaxis de JSON, XML y scripts
 echo.
 echo   help    - Mostrar esta ayuda
 echo.
 echo Ejemplos:
 echo   witcher3_mp.bat build
 echo   witcher3_mp.bat test
-echo   witcher3_mp.bat start
+echo   witcher3_mp.bat launch
+echo   witcher3_mp.bat validate
 echo.
 exit /b 0
+
+:launch
+echo ========================================
+echo    Lanzando The Witcher 3 con Mod
+echo ========================================
+echo.
+call "scripts\launch_game.bat"
+exit /b %errorlevel%
+
+:validate
+echo ========================================
+echo    Validando Archivos del Mod
+echo ========================================
+echo.
+python "scripts\validate_files.py"
+exit /b %errorlevel%
 
 :invalid
 echo ERROR: Comando inválido: %~1

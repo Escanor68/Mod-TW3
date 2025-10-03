@@ -1,8 +1,8 @@
 {
   "network": {
-    "port": 7777,
+    "port": 60000,
     "host": "localhost",
-    "maxConnections": 32,
+    "maxConnections": 4,
     "timeoutSeconds": 30
   },
   "version": {

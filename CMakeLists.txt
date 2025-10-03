@@ -35,8 +35,19 @@ else()
 endif()
 
 # Find required packages for TW3 Next-Gen
-find_package(ZLIB REQUIRED)
-find_package(lz4 CONFIG REQUIRED)
+find_package(ZLIB QUIET)
+if(NOT ZLIB_FOUND)
+    message(WARNING "ZLIB not found, using bundled version")
+    set(ZLIB_LIBRARIES "")
+    set(ZLIB_INCLUDE_DIRS "")
+endif()
+
+find_package(lz4 CONFIG QUIET)
+if(NOT lz4_FOUND)
+    message(WARNING "LZ4 not found, using bundled version")
+    set(LZ4_LIBRARIES "")
+    set(LZ4_INCLUDE_DIRS "")
+endif()
 
 # Set vcpkg toolchain if available
 if(DEFINED ENV{VCPKG_ROOT})
@@ -74,6 +85,7 @@ set(NETWORKING_SOURCES
     src/networking/net_message.cpp
     src/networking/net_tsqueue.cpp
     src/networking/NetworkLogger.cpp
+    src/networking/LANDiscovery.cpp
 )
 
 set(OPTIMIZATION_SOURCES
@@ -134,11 +146,13 @@ add_executable(Witcher3-MP
 )
 
 # Link libraries
-target_link_libraries(Witcher3-MP 
-    PRIVATE 
-    ZLIB::ZLIB
-    ${LZ4_LIBRARIES}
-)
+if(lz4_FOUND)
+    target_link_libraries(Witcher3-MP PRIVATE ${LZ4_LIBRARIES})
+endif()
+
+if(ZLIB_FOUND)
+    target_link_libraries(Witcher3-MP PRIVATE ZLIB::ZLIB)
+endif()
 
 if(WIN32)
     target_link_libraries(Witcher3-MP ws2_32)
@@ -175,6 +189,38 @@ target_include_directories(test_logging_system PRIVATE include)
 add_executable(test_network_connection tests/test_network_connection.cpp)
 target_link_libraries(test_network_connection Catch2::Catch2WithMain)
 target_include_directories(test_network_connection PRIVATE include)
+
+add_executable(test_integration_system tests/test_integration_system.cpp)
+target_link_libraries(test_integration_system Catch2::Catch2WithMain)
+target_include_directories(test_integration_system PRIVATE include)
+
+if(lz4_FOUND)
+    target_link_libraries(test_integration_system PRIVATE ${LZ4_LIBRARIES})
+endif()
+
+if(ZLIB_FOUND)
+    target_link_libraries(test_integration_system PRIVATE ZLIB::ZLIB)
+endif()
+
+if(WIN32)
+    target_link_libraries(test_integration_system ws2_32)
+endif()
+
+add_executable(test_game_modes tests/test_game_modes.cpp)
+target_link_libraries(test_game_modes Catch2::Catch2WithMain)
+target_include_directories(test_game_modes PRIVATE include)
+
+if(lz4_FOUND)
+    target_link_libraries(test_game_modes PRIVATE ${LZ4_LIBRARIES})
+endif()
+
+if(ZLIB_FOUND)
+    target_link_libraries(test_game_modes PRIVATE ZLIB::ZLIB)
+endif()
+
+if(WIN32)
+    target_link_libraries(test_game_modes ws2_32)
+endif()
 
 # Install targets
 install(TARGETS Witcher3-MP

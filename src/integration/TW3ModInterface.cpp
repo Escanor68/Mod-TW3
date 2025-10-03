@@ -1,5 +1,6 @@
 #include "integration/TW3ModInterface.h"
 #include "integration/REDkitBridge.h"
+#include "networking/LANDiscovery.h"
 #include "utils/Logger.h"
 #include <sstream>
 #include <fstream>
@@ -30,6 +31,7 @@ namespace TW3Integration
 
     TW3ModInterface::TW3ModInterface()
         : m_initialized(false), m_modConnected(false)
+        , m_lanDiscovery(nullptr), m_ipConnection(nullptr)
     {
         LOG_INFO("TW3ModInterface created");
     }
@@ -639,5 +641,140 @@ namespace TW3Integration
         WorldData data;
         // In a real implementation, this would parse JSON
         return data;
+    }
+
+    // LAN Discovery functions
+    void TW3ModInterface::InitializeLANDiscovery()
+    {
+        if (!m_lanDiscovery)
+        {
+            m_lanDiscovery = new TW3Networking::LANDiscovery();
+            if (m_lanDiscovery->Initialize())
+            {
+                // Set up callbacks
+                m_lanDiscovery->SetServerDiscoveredCallback([this](const TW3Networking::ServerInfo& server) {
+                    LOG_INFO("Server discovered: " + server.name + " at " + server.ip + ":" + std::to_string(server.port));
+                });
+                
+                m_lanDiscovery->SetDiscoveryFinishedCallback([this]() {
+                    LOG_INFO("LAN discovery finished, found " + std::to_string(m_lanDiscovery->GetServerCount()) + " servers");
+                });
+                
+                LOG_INFO("LAN Discovery system initialized");
+            }
+            else
+            {
+                LOG_ERROR("Failed to initialize LAN Discovery system");
+                delete m_lanDiscovery;
+                m_lanDiscovery = nullptr;
+            }
+        }
+    }
+
+    void TW3ModInterface::StartLANDiscovery()
+    {
+        if (m_lanDiscovery)
+        {
+            m_lanDiscovery->StartDiscovery();
+        }
+        else
+        {
+            LOG_WARNING("LAN Discovery not initialized");
+        }
+    }
+
+    void TW3ModInterface::StopLANDiscovery()
+    {
+        if (m_lanDiscovery)
+        {
+            m_lanDiscovery->StopDiscovery();
+        }
+    }
+
+    std::vector<TW3Networking::ServerInfo> TW3ModInterface::GetDiscoveredServers() const
+    {
+        if (m_lanDiscovery)
+        {
+            return m_lanDiscovery->GetDiscoveredServers();
+        }
+        return std::vector<TW3Networking::ServerInfo>();
+    }
+
+    // IP Connection functions
+    void TW3ModInterface::InitializeIPConnection()
+    {
+        if (!m_ipConnection)
+        {
+            m_ipConnection = new TW3Networking::IPConnection();
+            if (m_ipConnection->Initialize())
+            {
+                // Set up callbacks
+                m_ipConnection->SetConnectionCallback([this](bool success, const std::string& message) {
+                    if (success)
+                    {
+                        LOG_INFO("Connected to server: " + message);
+                        SetModConnected(true);
+                    }
+                    else
+                    {
+                        LOG_ERROR("Failed to connect to server: " + message);
+                        SetModConnected(false);
+                    }
+                });
+                
+                m_ipConnection->SetDataReceivedCallback([this](const std::string& data) {
+                    ProcessModMessage(data);
+                });
+                
+                LOG_INFO("IP Connection system initialized");
+            }
+            else
+            {
+                LOG_ERROR("Failed to initialize IP Connection system");
+                delete m_ipConnection;
+                m_ipConnection = nullptr;
+            }
+        }
+    }
+
+    bool TW3ModInterface::ConnectToServer(const std::string& ip, uint16_t port, const std::string& username)
+    {
+        if (!m_ipConnection)
+        {
+            InitializeIPConnection();
+        }
+        
+        if (m_ipConnection)
+        {
+            return m_ipConnection->ConnectToServer(ip, port, username);
+        }
+        
+        return false;
+    }
+
+    void TW3ModInterface::DisconnectFromServer()
+    {
+        if (m_ipConnection)
+        {
+            m_ipConnection->Disconnect();
+            SetModConnected(false);
+        }
+    }
+
+    bool TW3ModInterface::IsConnectedToServer() const
+    {
+        return m_ipConnection && m_ipConnection->IsConnected();
+    }
+
+    void TW3ModInterface::SendToServer(const std::string& message)
+    {
+        if (m_ipConnection && m_ipConnection->IsConnected())
+        {
+            m_ipConnection->SendData(message);
+        }
+        else
+        {
+            LOG_WARNING("Not connected to server, cannot send message");
+        }
     }
 }
