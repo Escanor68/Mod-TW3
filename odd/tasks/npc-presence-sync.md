@@ -14,8 +14,9 @@ Acceptance: two clients in range see the same target NPC appear/move for the agr
 
 ## Tasks
 
-- [ ] T1 (S2, S4) — Map native hook surface and current opcodes — route: inline — status: pending — commit: —
-- [ ] T2 (S1, S3) — Product refine: party-only vs proximity global (blocking decision before code) — route: inline — status: pending — commit: —
+- [x] T1 (S2, S4) — Map native hook surface and current opcodes — route: inline — status: done — commit: pending
+  - Inventory: `docs/hosting/npc-presence-sync.md`. `presence` tag ≠ NPC sync; server only MOVE/UPDATE1–4.
+- [ ] T2 (S1, S3) — Product refine: party-only vs proximity global (blocking decision before code) — route: inline — status: blocked — commit: —
 - [ ] T3 (S3, S4) — Protocol + server relay for NPC presence slice — route: inline — status: pending — commit: —
 - [ ] T4 (S3) — Client/script apply remote NPC presence — route: inline — status: pending — commit: —
 - [ ] T5 (S3) — Dual-client verification evidence — route: inline — status: pending — commit: —
@@ -25,3 +26,4 @@ Acceptance: two clients in range see the same target NPC appear/move for the agr
 - L1: "primero arrancamos con crear los ODD y despues vamos con lo demas"
 - L2: 2026-10-31 — Feature doc created from roadmap F3. Implementation not authorized yet; tracking only.
 - L3: Related ask: "y como funciona en los demas juegos como where winds meet ... como puedo hacer para traerlo a este mod?"
+- L4: 2026-10-31 — User: "siguei con F3". T1 inventory completed; T2 blocking on scope choice.

@@ -12,7 +12,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R3 | Ban is IP-only; username spoof after IP change | F1 session-identity | medium | accepted | Documented in session-identity.md; full accounts deferred to F5 |
 | R4 | Whitelist on/off was runtime-only (lost on restart) | F1 session-identity | medium | resolved | `whitelist on/off` now persists to `server.properties` |
 | R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | Deferred to combat-authority / later auth |
-| R6 | NPC desync / no shared world | F3 npc-presence-sync | high | open | Tracked in F3; not started |
+| R6 | NPC desync / no shared world | F3 npc-presence-sync | high | mitigating | T1 inventory done; blocked on party-only vs proximity-global (T2) |
 | R7 | Client-authoritative combat / cheating | F4 combat-authority | high | open | Tracked in F4 |
 | R8 | Item duping via local saves | F5 shared-persistence | high | open | Tracked in F5 |
 | R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | open | Tracked in F6 |

@@ -83,6 +83,10 @@ Bans, whitelist, kicks, username holds: [session-identity.md](session-identity.m
 
 Party-scoped world slice: [party-world-slice.md](party-world-slice.md).
 
+## NPC presence (F3)
+
+Inventory / design notes: [npc-presence-sync.md](npc-presence-sync.md).
+
 ## Out of scope (later ODD features)
 
 NPC sync, combat authority, shared persistence, sharding — see `odd/tasks/`.
