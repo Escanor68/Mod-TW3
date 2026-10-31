@@ -4,17 +4,17 @@
 
 ## Modes
 
-| Mode | When | Characters | Story seat |
-|------|------|------------|------------|
-| **Story** | Until “historia terminada” | Owner = **Geralt**; others = **humano / elfo / brujo / hechicera** (support) | Geralt owner required |
-| **Contracts / explore** | Only after “historia terminada” is declared | **Free pick** (e.g. Eredin, Emhyr, any CPC) | No Geralt-owner requirement |
+| Mode | When | Characters | Story seat | Contracts |
+|------|------|------------|------------|-----------|
+| **Story** | Until “historia terminada” | Owner = **Geralt**; others = **humano / elfo / brujo / hechicera** (support) | Geralt owner required | May be completed **during** the story (cast rules stay story) |
+| **Contracts / explore** | Only after “historia terminada” | **Free pick** — each player any CPC (e.g. Eredin, Emhyr) | No Geralt-owner requirement | Leftover contracts not finished in the main story; group completes them |
 
-Mode does **not** switch because the owner toggles it early — only when the room declares **historia terminada**.
+Mode does **not** switch because someone finishes a mid-story contract — only when the room declares **historia terminada**.
 
 ## Intent
 
-- Keep the main story coherent: one Geralt drives dialog/quest continuity; supports assist.
-- After the story is declared finished, unlock free casting for exploring and group contracts.
+- Keep the main story coherent: one Geralt drives dialog/quest continuity; supports assist; contracts along the way still use that cast.
+- After the story is declared finished, unfinished contracts (and explore) are for the whole group with free character choice per player.
 
 ## Story owner rules
 
