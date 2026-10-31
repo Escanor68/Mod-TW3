@@ -1,0 +1,9 @@
+# Copy next to WitcherServer.jar as server.properties
+# CLI port argument overrides this file; missing file uses UDP 40000.
+
+port=40000
+whitelist=false
+
+# Optional HTTP status (SVG/JSON). Default status port is 40001.
+svgEnabled=false
+# svgPort=40001

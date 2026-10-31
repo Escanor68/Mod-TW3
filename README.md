@@ -14,6 +14,8 @@ To play Witcher Online, go to the [nexus page](https://www.nexusmods.com/witcher
 
 For general information, go to the [Witcher Online Wiki](https://rejuvenate.gitbook.io/witcheronline).
 
+To host a server friends can join from outside your LAN (Tailscale or VPS), see [docs/hosting/dedicated-hosting.md](docs/hosting/dedicated-hosting.md). Building the Java server from this repo: [server/README.md](server/README.md).
+
 Special thanks to Werasik2aa for his [multiplayer implementation](https://github.com/werasik2aa/Witcher3-Multiplayer) which helped a lot.
 
 ## Features / Playguide

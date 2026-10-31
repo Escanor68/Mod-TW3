@@ -398,3 +398,5 @@ bin/
 .DS_Store
 
 .idea/
+# Local AI runtime state
+.atl/
