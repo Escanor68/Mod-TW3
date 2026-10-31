@@ -44,6 +44,7 @@ public class WitcherServer
     private static final AtomicLong totalPacketsSent = new AtomicLong(0);
     private static final AtomicLong totalSendFailures = new AtomicLong(0);
     private static final AtomicLong totalBroadcastTicks = new AtomicLong(0);
+    private static final AtomicLong totalInterestSkips = new AtomicLong(0);
 
     private static volatile long lastBroadcastTickNanos = 0L;
 
@@ -742,7 +743,7 @@ public class WitcherServer
 
             applyPositionFromMove(current, frozenFields);
 
-            int sent = broadcastChunk(socket, snapshotRecipients(), current, "MOVE", frozenFields);
+            int sent = broadcastChunk(socket, snapshotInterestRecipients(current), current, "MOVE", frozenFields);
             totalPacketsSent.addAndGet(sent);
             return;
         }
@@ -923,9 +924,16 @@ public class WitcherServer
         ack.add(hitType);
         ack.add(attacker.username);
 
+        List<ClientEndpoint> hitRecipients = snapshotInterestRecipients(attacker);
+        if (target.endpoint != null && !hitRecipients.contains(target.endpoint))
+        {
+            hitRecipients = new ArrayList<>(hitRecipients);
+            hitRecipients.add(target.endpoint);
+        }
+
         int sent = broadcastChunk(
                 socket,
-                snapshotRecipients(),
+                hitRecipients,
                 attacker,
                 "HITACK",
                 Collections.unmodifiableList(ack));
@@ -1058,11 +1066,13 @@ public class WitcherServer
         {
             try
             {
-                List<ClientEndpoint> recipients = snapshotRecipients();
                 int packetsSentThisTick = 0;
+                int interestRecipientSum = 0;
 
                 for (PlayerSession session : players.values())
                 {
+                    List<ClientEndpoint> recipients = snapshotInterestRecipients(session);
+                    interestRecipientSum += recipients.size();
                     packetsSentThisTick += broadcastChunk(socket, recipients, session, "UPDATE1A", session.update1AFields);
                     packetsSentThisTick += broadcastChunk(socket, recipients, session, "UPDATE1B", session.update1BFields);
                     packetsSentThisTick += broadcastChunk(socket, recipients, session, "UPDATE2A", session.update2AFields);
@@ -1078,11 +1088,14 @@ public class WitcherServer
                 long now = System.nanoTime();
                 if ((now - lastHeartbeat) >= BROADCAST_HEARTBEAT_NANOS)
                 {
-                    dbg("Broadcast heartbeat: players=%d recipients=%d packetsSent=%d totalPacketsSent=%d totalSendFailures=%d\n",
-                            players.size(),
-                            recipients.size(),
+                    int playerCount = players.size();
+                    dbg("Broadcast heartbeat: players=%d interestRecipientSum=%d baselineGlobal=%d packetsSent=%d totalPacketsSent=%d interestSkips=%d totalSendFailures=%d\n",
+                            playerCount,
+                            interestRecipientSum,
+                            InterestManagementRules.baselineGlobalRecipients(playerCount) * Math.max(1, playerCount),
                             packetsSentThisTick,
                             totalPacketsSent.get(),
+                            totalInterestSkips.get(),
                             totalSendFailures.get());
                     lastHeartbeat = now;
                 }
@@ -1108,6 +1121,68 @@ public class WitcherServer
         {
             unique.add(session.endpoint);
         }
+        return new ArrayList<>(unique);
+    }
+
+    /**
+     * Interest-managed recipients for MOVE / UPDATE* / HITACK (F6).
+     * Includes publisher endpoint (same as global snapshot). Party members always included.
+     * Others need positions within {@link InterestManagementRules#DEFAULT_INTEREST_RADIUS}.
+     */
+    private static List<ClientEndpoint> snapshotInterestRecipients(PlayerSession publisher)
+    {
+        Set<ClientEndpoint> unique = new HashSet<>();
+        if (publisher == null)
+        {
+            return new ArrayList<>();
+        }
+
+        float radius = InterestManagementRules.DEFAULT_INTEREST_RADIUS;
+        int considered = 0;
+        int kept = 0;
+
+        for (PlayerSession session : players.values())
+        {
+            if (session == null || session.endpoint == null)
+            {
+                continue;
+            }
+
+            considered++;
+
+            boolean sameParty = PartyScopeRules.sameParty(
+                    publisher.inParty,
+                    publisher.joinedParty,
+                    publisher.username,
+                    session.inParty,
+                    session.joinedParty,
+                    session.username);
+
+            boolean relay = InterestManagementRules.shouldRelay(
+                    sameParty,
+                    publisher.hasPosition,
+                    session.hasPosition,
+                    publisher.posX,
+                    publisher.posY,
+                    publisher.posZ,
+                    session.posX,
+                    session.posY,
+                    session.posZ,
+                    radius);
+
+            if (relay)
+            {
+                unique.add(session.endpoint);
+                kept++;
+            }
+        }
+
+        int skipped = considered - kept;
+        if (skipped > 0)
+        {
+            totalInterestSkips.addAndGet(skipped);
+        }
+
         return new ArrayList<>(unique);
     }
 
@@ -1283,6 +1358,7 @@ public class WitcherServer
             dbg("reservedUsernames=%d\n", reservedUsernames.size());
             dbg("broadcastTicks=%d\n", totalBroadcastTicks.get());
             dbg("totalPacketsSent=%d\n", totalPacketsSent.get());
+            dbg("interestSkips=%d\n", totalInterestSkips.get());
             dbg("totalSendFailures=%d\n", totalSendFailures.get());
             dbg("lastBroadcastTickAgeMs=%d\n\n", lastTickAgeMs);
             return;
