@@ -240,6 +240,17 @@ statemachine class r_MultiplayerClient
     private var wo_nativePresence : string;
     private var wo_isTeleporting : bool;
 
+    // F3 party NPC presence ghosts
+    private var remoteNpcEntries : array<wo_RemoteNpcEntry>;
+    private var nextNpcPublishAt : float;
+    private var nextNpcPruneAt : float;
+    default nextNpcPublishAt = -999;
+    default nextNpcPruneAt = -999;
+    private var woNpcMaxEntries : int;
+    default woNpcMaxEntries = 24;
+    private var woNpcStaleSeconds : float;
+    default woNpcStaleSeconds = 5.0;
+
     public function WO_SetTeleporting(val : bool)
     {
         wo_isTeleporting = val;
@@ -4864,6 +4875,7 @@ statemachine class r_MultiplayerClient
         }
 
         destroyAllRiderHorseAnchors();
+        clearRemoteNpcPresence();
 
         playersByServerId = (new MP_SU_HashMap in this).init();
 
@@ -5562,8 +5574,6 @@ statemachine class r_MultiplayerClient
             WO_Float(15));
     }
 
-    // F3 party-scoped NPC presence (fields: npcKey template x y z yaw hp state).
-    // Spawn/apply is scaffolded — full entity lifecycle lands with dual-client verification.
     function WO_ApplyNpc()
     {
         theGame.r_getMultiplayerClient().applyRemoteNpcPresence(
@@ -5579,20 +5589,230 @@ statemachine class r_MultiplayerClient
             WO_Str(7));
     }
 
-    public function applyRemoteNpcPresence(serverPlayerId : int, publisher : string, npcKey : string, templatePath : string,
-            x : float, y : float, z : float, yaw : float, hp : float, stateName : string)
+    private function woNpcCompositeKey(publisher : string, npcKey : string) : string
     {
-        // Scaffold: log via notification in debug builds only when key changes — avoid spam.
-        // Full ghost-NPC spawn will reuse remote player entity patterns in a follow-up slice.
-        if(npcKey == "" || templatePath == "")
+        return publisher + "#" + npcKey;
+    }
+
+    private function findRemoteNpcIndex(compositeKey : string) : int
+    {
+        var i : int;
+
+        for(i = 0; i < remoteNpcEntries.Size(); i += 1)
+        {
+            if(remoteNpcEntries[i] && remoteNpcEntries[i].compositeKey == compositeKey)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private function destroyRemoteNpcEntity(entry : wo_RemoteNpcEntry)
+    {
+        if(entry && entry.entity)
+        {
+            entry.entity.Destroy();
+            entry.entity = NULL;
+        }
+    }
+
+    private function spawnRemoteNpcEntity(entry : wo_RemoteNpcEntry) : bool
+    {
+        var temp : CEntityTemplate;
+        var rot : EulerAngles;
+        var actor : CActor;
+
+        if(!entry)
+        {
+            return false;
+        }
+
+        destroyRemoteNpcEntity(entry);
+
+        temp = (CEntityTemplate)LoadResource(entry.templatePath, true);
+        if(!temp)
+        {
+            temp = getMaleTemp();
+        }
+
+        if(!temp)
+        {
+            return false;
+        }
+
+        rot.Yaw = entry.yaw;
+        actor = (CActor)theGame.CreateEntity(temp, entry.pos, rot, true, true, false, PM_DontPersist);
+
+        if(!actor)
+        {
+            return false;
+        }
+
+        actor.AddTag('MPEntity');
+        actor.AddTag('MPNpcEntity');
+        actor.EnableCollisions(false);
+        actor.EnableCharacterCollisions(false);
+        actor.SetGameplayVisibility(false);
+        actor.SetCanPlayHitAnim(false);
+        actor.SetImmortalityMode(AIM_Invulnerable, AIC_Default, true);
+        actor.SetTemporaryAttitudeGroup('friendly_to_player', AGP_Default);
+        actor.SetAttitude(thePlayer, AIA_Friendly);
+
+        if(!actor.HasAbility('IsNotScaredOfMonsters'))
+        {
+            actor.AddAbility('IsNotScaredOfMonsters', true);
+        }
+
+        entry.entity = actor;
+        return true;
+    }
+
+    private function teleportRemoteNpcEntity(entry : wo_RemoteNpcEntry)
+    {
+        var rot : EulerAngles;
+
+        if(!entry || !entry.entity)
         {
             return;
         }
 
-        // Keep a lightweight breadcrumb for operators verifying the pipe end-to-end.
-        if(theGame.GetInGameConfigWrapper().GetVarValue('MPGhosts_Main', 'MPGhosts_DebugNpc'))
+        rot = entry.entity.GetWorldRotation();
+        rot.Yaw = entry.yaw;
+        entry.entity.TeleportWithRotation(entry.pos, rot);
+    }
+
+    public function applyRemoteNpcPresence(serverPlayerId : int, publisher : string, npcKey : string, templatePath : string,
+            x : float, y : float, z : float, yaw : float, hp : float, stateName : string)
+    {
+        var key : string;
+        var idx : int;
+        var entry : wo_RemoteNpcEntry;
+        var now : float;
+
+        if(npcKey == "" || publisher == "")
         {
-            theGame.GetGuiManager().ShowNotification("NPC sync: " + publisher + " " + npcKey);
+            return;
+        }
+
+        // Never mirror our own publishes as a remote ghost.
+        if(publisher == username)
+        {
+            return;
+        }
+
+        key = woNpcCompositeKey(publisher, npcKey);
+        now = theGame.GetEngineTimeAsSeconds();
+
+        if(stateName == "despawn")
+        {
+            idx = findRemoteNpcIndex(key);
+            if(idx >= 0)
+            {
+                destroyRemoteNpcEntity(remoteNpcEntries[idx]);
+                remoteNpcEntries.Erase(idx);
+            }
+            return;
+        }
+
+        if(templatePath == "")
+        {
+            templatePath = "dlc\dlc_mpmod\data\entities\geralt_npc.w2ent";
+        }
+
+        idx = findRemoteNpcIndex(key);
+
+        if(idx < 0)
+        {
+            if(remoteNpcEntries.Size() >= woNpcMaxEntries)
+            {
+                destroyRemoteNpcEntity(remoteNpcEntries[0]);
+                remoteNpcEntries.Erase(0);
+            }
+
+            entry = new wo_RemoteNpcEntry in this;
+            entry.compositeKey = key;
+            entry.npcKey = npcKey;
+            entry.publisher = publisher;
+            entry.templatePath = templatePath;
+            entry.pos.X = x;
+            entry.pos.Y = y;
+            entry.pos.Z = z;
+            entry.yaw = yaw;
+            entry.hp = hp;
+            entry.stateName = stateName;
+            entry.lastUpdate = now;
+
+            if(spawnRemoteNpcEntity(entry))
+            {
+                remoteNpcEntries.PushBack(entry);
+
+                if(theGame.GetInGameConfigWrapper().GetVarValue('MPGhosts_Main', 'MPGhosts_DebugNpc'))
+                {
+                    theGame.GetGuiManager().ShowNotification("NPC spawn: " + publisher + " " + npcKey);
+                }
+            }
+
+            return;
+        }
+
+        entry = remoteNpcEntries[idx];
+        entry.templatePath = templatePath;
+        entry.pos.X = x;
+        entry.pos.Y = y;
+        entry.pos.Z = z;
+        entry.yaw = yaw;
+        entry.hp = hp;
+        entry.stateName = stateName;
+        entry.lastUpdate = now;
+
+        if(!entry.entity)
+        {
+            spawnRemoteNpcEntity(entry);
+        }
+        else
+        {
+            teleportRemoteNpcEntity(entry);
+        }
+    }
+
+    public function pruneRemoteNpcPresence()
+    {
+        var i : int;
+        var now : float;
+
+        now = theGame.GetEngineTimeAsSeconds();
+
+        if(now < nextNpcPruneAt)
+        {
+            return;
+        }
+
+        nextNpcPruneAt = now + 0.5;
+
+        for(i = remoteNpcEntries.Size() - 1; i >= 0; i -= 1)
+        {
+            if(!remoteNpcEntries[i] || (now - remoteNpcEntries[i].lastUpdate) > woNpcStaleSeconds)
+            {
+                if(remoteNpcEntries[i])
+                {
+                    destroyRemoteNpcEntity(remoteNpcEntries[i]);
+                }
+
+                remoteNpcEntries.Erase(i);
+            }
+        }
+    }
+
+    public function clearRemoteNpcPresence()
+    {
+        var i : int;
+
+        for(i = remoteNpcEntries.Size() - 1; i >= 0; i -= 1)
+        {
+            destroyRemoteNpcEntity(remoteNpcEntries[i]);
+            remoteNpcEntries.Erase(i);
         }
     }
 
@@ -5610,11 +5830,59 @@ statemachine class r_MultiplayerClient
             stateName = "idle";
         }
 
+        // Spaces break the DLL tokenizer — keep keys/paths space-free.
+        if(StrContains(npcKey, " ") || StrContains(templatePath, " "))
+        {
+            return;
+        }
+
         payload = "npc " + npcKey + " " + templatePath + " "
             + pos.X + " " + pos.Y + " " + pos.Z + " "
             + yaw + " " + hp + " " + stateName;
 
         WO_Send(payload);
+    }
+
+    public function publishLocalHostileNpcTarget()
+    {
+        var target : CActor;
+        var now : float;
+        var npcKey : string;
+        var rot : EulerAngles;
+        var templatePath : string;
+
+        if(!inParty)
+        {
+            return;
+        }
+
+        now = theGame.GetEngineTimeAsSeconds();
+
+        if(now < nextNpcPublishAt)
+        {
+            return;
+        }
+
+        nextNpcPublishAt = now + 0.25;
+
+        target = thePlayer.GetTarget();
+
+        if(!target || !target.IsAlive())
+        {
+            return;
+        }
+
+        if(target.HasTag('MPEntity') || target.HasTag('MPNpcEntity'))
+        {
+            return;
+        }
+
+        // First slice: stable shared visual template (path has no spaces).
+        templatePath = "dlc\dlc_mpmod\data\entities\geralt_npc.w2ent";
+        npcKey = "tgt_" + NameToString(target.GetName());
+        rot = target.GetWorldRotation();
+
+        publishNpcPresence(npcKey, templatePath, target.GetWorldPosition(), rot.Yaw, target.GetHealthPercents(), "combat");
     }
 
     function WO_PumpInbound(maxMessages : int)
@@ -7635,6 +7903,8 @@ state WO_Tick in r_MultiplayerClient
             parent.checkRidingAttachment();
             parent.checkPlayerChange();
             parent.updateWorldSync();
+            parent.publishLocalHostileNpcTarget();
+            parent.pruneRemoteNpcPresence();
             parent.updateLeaderDialogReadyPopup();
             MP_SU_moveMinimapPins();
 

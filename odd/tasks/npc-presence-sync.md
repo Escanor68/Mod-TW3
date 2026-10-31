@@ -10,7 +10,7 @@ Objective: Synchronize NPC/enemy presence (and related transforms) between playe
 - S4: Touches `client/` + `witcher/` + `server/` — Risk: contracts (new `NPC` opcode), concurrency.
 - S5: Depends on F0; uses F2 party model for scope.
 
-Acceptance: two party clients see the same published NPC pipe (receive apply path). Full entity spawn may remain scaffold until T5 evidence.
+Acceptance: two party clients see a remote NPC ghost for the publisher’s combat target. T5 = in-game dual-client proof.
 
 ## Tasks
 
@@ -18,8 +18,8 @@ Acceptance: two party clients see the same published NPC pipe (receive apply pat
 - [x] T2 (S1, S3) — Product refine: party-only vs proximity global — route: inline — status: done — commit: 7c92f59
   - User confirmed party-only ("perfecto" after recommendation).
 - [x] T3 (S3, S4) — Protocol + server relay for NPC presence slice — route: inline — status: done — commit: 7c92f59
-- [x] T4 (S3) — Client/script apply remote NPC presence — route: inline — status: partial — commit: 7c92f59
-  - Pipe end-to-end scaffolded; entity spawn deferred (debug flag).
+- [x] T4 (S3) — Client/script apply remote NPC presence — route: inline — status: done — commit: pending
+  - Spawn/teleport/despawn ghosts + auto-publish local hostile target while in party.
 - [ ] T5 (S3) — Dual-client verification evidence — route: inline — status: pending — commit: —
 
 ## Log
@@ -30,3 +30,4 @@ Acceptance: two party clients see the same published NPC pipe (receive apply pat
 - L4: 2026-10-31 — User: "siguei con F3". T1 done.
 - L5: 2026-10-31 — Recommended party-only; user: "perfecto". Implemented NPC opcode + party filter + client/script scaffold.
 - L6: Risk: item 3 (new NPC protocol contract); item 4 (party recipient selection). Item 6: PartyScopeRules tests; T5 in-game still open.
+- L7: 2026-10-31 — User: "seguimos con spawn de entidades". Implemented remoteNpc ghost spawn + local target publish.

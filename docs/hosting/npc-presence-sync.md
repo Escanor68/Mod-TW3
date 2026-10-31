@@ -24,7 +24,11 @@ NPC\t<playerId>\t<username>\t<npcKey>\t<template>\t<x>\t<y>\t<z>\t<yaw>\t<hp>\t<
 ### DLL → Script
 `WO_Poll` opcode **10** → `WO_ApplyNpc` → `applyRemoteNpcPresence(...)`.
 
-Spawn of real entities is **scaffolded** (debug notification behind `MPGhosts_DebugNpc`); full ghost-NPC lifecycle is the next hardening pass (T4/T5 in-game).
+### Entity spawn (T4)
+
+Receivers spawn a non-persistent `CActor` ghost (`MPEntity` + `MPNpcEntity`), invulnerable / non-colliding (same idea as player ghosts).  
+While in a party, each client auto-publishes its current hostile `GetTarget()` (~4 Hz) using the shared `geralt_npc.w2ent` visual for this slice.  
+Stale entries prune after ~5s; `state=despawn` removes immediately. Cap: 24 remote NPCs.
 
 ## Inventory reminder
 
@@ -32,7 +36,8 @@ Spawn of real entities is **scaffolded** (debug notification behind `MPGhosts_De
 
 ## Manual checklist (T5)
 
-- [ ] A and B in same party; A publishes NPC → B receives opcode 10 / debug toast if debug on
-- [ ] C not in party → no NPC packet
+- [ ] A and B in same party; A fights an enemy → B sees a ghost near that enemy
+- [ ] C not in party → no NPC ghost
 - [ ] A alone → no self-echo / no broadcast
-- [ ] After leave party → stop receiving
+- [ ] Leave party / hide ghosts → remote NPC entities cleared
+- [ ] Optional: `MPGhosts_DebugNpc` shows spawn toasts
