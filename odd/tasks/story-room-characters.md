@@ -27,7 +27,7 @@ Acceptance (when implemented):
 
 ## Tasks
 
-- [x] T1 (S9, S10, S8) — Product refine: mode = only on “historia terminada”; leave = highest-level Geralt transfer — route: inline — status: done — commit: 82db024
+- [x] T1 (S9, S10, S8) — Product refine: mode = only on “historia terminada”; leave = highest-level Geralt transfer — route: inline — status: done — commit: 098e4d2
 - [ ] T2 (S2, S12) — Story-mode species matrix vs CPC types — route: inline — status: pending — commit: —
 - [ ] T3 (S3, S4, S6, S8, S10, S14) — Protocol + server: “historia terminada”→contracts, Geralt owner, leave transfer, free-pick — route: inline — status: pending — commit: —
 - [ ] T4 (S3, S6, S8, S13) — Client/script: mode gates + Geralt seat handoff on transfer — route: inline — status: pending — commit: —
