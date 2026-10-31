@@ -113,6 +113,7 @@ Operator / developer notes under `docs/hosting/`:
 | Server-validated PvP hits | [combat-authority.md](docs/hosting/combat-authority.md) |
 | Crowns + key-item bag persistence | [shared-persistence.md](docs/hosting/shared-persistence.md) |
 | Proximity interest broadcasts | [world-instances.md](docs/hosting/world-instances.md) |
+| Story room characters (Geralt owner + species support) | [story-room-characters.md](docs/hosting/story-room-characters.md) — ODD F7, not implemented yet |
 
 **Still local / residual:** full quest graph, full inventory, and deep NPC AI are not fully server-owned. Dual-client in-game checklists are operator-run (`odd/risks.md`).
 

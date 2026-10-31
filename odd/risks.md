@@ -20,6 +20,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R11 | Party time/weather failed when leader ghost not spawned | F2 party-world-slice | medium | resolved | Store UPDATE4 world fields on global player; fallback in `updateWorldSync` |
 | R12 | In-game dual-client proof unavailable in this environment | F2 / F0 | medium | accepted | Manual checklists; operator runs acceptance on TW3 clients |
 | R13 | Publishing WitcherOnline work into Mod-TW3 must not wipe existing Witcher3-MP `main` | delivery | high | accepted | User authorized force-replace of `main` with WitcherOnline line (`ddf2cae`); prior Witcher3-MP `main` overwritten |
+| R14 | Story breaks if non-Geralt drives dialog / no room owner | F7 story-room-characters | high | open | Tracked in F7: enforce single Geralt owner per room; support species cannot own story seat |
 
 ## Resolution log
 
@@ -40,6 +41,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R7 accepted**: F4 PvP HIT slice closed; residual local animations and packet forge deferred to R5/ops.
 - 2026-10-31 — **R8 accepted**: F5 crowns/key-bag slice closed; full inventory/quest graph remains local residual.
 - 2026-10-31 — **R5 resolved**: optional shared-secret AUTH gate; residual empty-token LAN mode is operator choice.
+- 2026-10-31 — **R14 open**: F7 story-room-characters ODD added (Geralt room owner + species support).
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use
