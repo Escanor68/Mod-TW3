@@ -52,3 +52,7 @@ Victim applies server HP to local vitality; all clients refresh remote ghost `he
 - Does **not** stop local single-player damage animations; it overlays authoritative HP for online PvP targets.
 - UDP is still forgeable (R5); this slice only removes trivial client-declared HP for covered hits.
 - NPC combat authority is deferred (depends on deeper F3).
+
+## Residual risk (R7)
+
+Server owns covered PvP HP. Local hit animations can still play; unauthenticated UDP remains R5. Residual **accepted** for F4.
