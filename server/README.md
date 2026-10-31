@@ -4,8 +4,9 @@ Java UDP server for Witcher Online. Default listen port: **40000**.
 
 ## Requirements
 
-- **JDK 21+** to compile (upstream packaging targets modern Java).
+- **JDK 21+** to compile (upstream packaging targets modern Java). Older JDKs (e.g. 8) will fail the shared gate `scripts/require-jdk21.sh`.
 - Runtime: same JRE/JDK; place config files beside the JAR (`appDir()` = JAR directory).
+- Optional portable install path used by scripts: `JAVA_HOME=~/.local/jdk/jdk-21.0.13+9` (override as needed).
 
 ## Build and run
 

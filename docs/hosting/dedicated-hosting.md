@@ -73,7 +73,7 @@ Local automation helper (bind + config shape only): `docs/hosting/smoke-local.sh
 
 ## Build from this repository
 
-Requires **JDK 21+** (source uses APIs newer than Java 8). See `server/README.md`.
+Requires **JDK 21+** (source uses APIs newer than Java 8). Test scripts call `server/scripts/require-jdk21.sh` and exit if the JDK is too old. See `server/README.md`.
 
 ## Session identity / moderation
 

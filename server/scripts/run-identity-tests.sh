@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-JAVA_HOME="${JAVA_HOME:-$HOME/.local/jdk/jdk-21.0.13+9}"
-if [[ ! -x "$JAVA_HOME/bin/javac" ]]; then
-  echo "Need JDK 21+. Set JAVA_HOME (tried $JAVA_HOME)" >&2
-  exit 1
-fi
+# shellcheck source=require-jdk21.sh
+source "$(dirname "$0")/require-jdk21.sh"
 OUT="$ROOT/out-test"
 rm -rf "$OUT"
 mkdir -p "$OUT"

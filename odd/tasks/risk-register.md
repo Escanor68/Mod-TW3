@@ -12,7 +12,7 @@ Objective: Close remaining open/mitigating rows in `odd/risks.md` — **one risk
 
 - [x] T1 R9 — route: inline — status: done — commit: 3dd61a4
 - [x] T2 R10 — route: inline — status: done — commit: 8a854a5
-- [ ] T3 R2 — route: inline — status: pending
+- [x] T3 R2 — route: inline — status: done — commit: 95054fa
 - [ ] T4 R1 — route: inline — status: pending
 - [ ] T5 R6 — route: inline — status: pending
 - [ ] T6 R7 — route: inline — status: pending

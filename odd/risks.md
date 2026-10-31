@@ -8,7 +8,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | ID | Risk | Feature | Severity | Status | Mitigation / resolution |
 |----|------|---------|----------|--------|-------------------------|
 | R1 | Home host unreachable (CGNAT / no public IP) | F0 dedicated-hosting | high | mitigating | Document Tailscale + VPS; local smoke only — live peer join still operator-owned |
-| R2 | JDK mismatch: repo needs 21+, some hosts only have 8 | F0 / build | medium | mitigating | Document JDK 21+; portable JDK under `~/.local/jdk` for this machine |
+| R2 | JDK mismatch: repo needs 21+, some hosts only have 8 | F0 / build | medium | resolved | Shared `require-jdk21.sh` gates all server test scripts; docs call out JDK 21+ |
 | R3 | Ban is IP-only; username spoof after IP change | F1 session-identity | medium | accepted | Documented in session-identity.md; full accounts deferred to F5 |
 | R4 | Whitelist on/off was runtime-only (lost on restart) | F1 session-identity | medium | resolved | `whitelist on/off` now persists to `server.properties` |
 | R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | F4 clamps HIT damage/range/cooldown; full packet auth still deferred |
@@ -34,6 +34,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R9 mitigating** during F6: interest radius + party exception; heartbeat compares interest vs baseline.
 - 2026-10-31 — **R9 resolved**: F6 interest slice accepted; residual multi-process shards remain out of scope.
 - 2026-10-31 — **R10 resolved**: status HTTP defaults to loopback bind (`svgBind`).
+- 2026-10-31 — **R2 resolved**: `require-jdk21.sh` fail-fast on JDK &lt; 21 for all `run-*-tests.sh`.
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use
