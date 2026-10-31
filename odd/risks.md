@@ -15,7 +15,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R6 | NPC desync / no shared world | F3 npc-presence-sync | high | mitigating | Party NPC ghosts spawn; first slice uses shared geralt_npc visual; T5 in-game open |
 | R7 | Client-authoritative combat / cheating | F4 combat-authority | high | mitigating | Server `authHealth` + HIT/HITACK; local animations can still play; dual-client T4 open |
 | R8 | Item duping via local saves | F5 shared-persistence | high | mitigating | Crowns+key-bag server snapshot; covered qty overwrite; full inventory still local |
-| R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | mitigating | Interest radius 100u + party exception; heartbeat logs interest vs baseline |
+| R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | resolved | Interest radius 100u + party exception; heartbeat logs interest vs baseline (`092924f`) |
 | R10 | Exposing status HTTP (40001) on public VPS | F0 ops | low | open | Runbook: enable only if locked down |
 | R11 | Party time/weather failed when leader ghost not spawned | F2 party-world-slice | medium | resolved | Store UPDATE4 world fields on global player; fallback in `updateWorldSync` |
 | R12 | In-game dual-client proof unavailable in this environment | F2 / F0 | medium | accepted | Manual checklists; operator runs acceptance on TW3 clients |
@@ -32,6 +32,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R7 mitigating** during F4: HIT/HITACK + `CombatAuthorityRules`; residual local anim + UDP forge (R5).
 - 2026-10-31 — **R8 mitigating** during F5: crowns+key-bag TSV snapshots; covered items overwrite on load.
 - 2026-10-31 — **R9 mitigating** during F6: interest radius + party exception; heartbeat compares interest vs baseline.
+- 2026-10-31 — **R9 resolved**: F6 interest slice accepted; residual multi-process shards remain out of scope.
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use
