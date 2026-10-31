@@ -89,11 +89,17 @@ public class WitcherServer
         boolean svgEnabled = readBoolean(serverProperties, "svgEnabled", false);
         int svgPort = DEFAULT_STATUS_PORT;
 
+        String svgBind = readString(serverProperties, "svgBind", "127.0.0.1").trim();
+        if (svgBind.isEmpty())
+        {
+            svgBind = "127.0.0.1";
+        }
+
         if (svgEnabled)
         {
             svgPort = chooseSvgPort(serverProperties);
             loadStatusAssets();
-            statusServer = startStatusServer(svgPort);
+            statusServer = startStatusServer(svgBind, svgPort);
         }
 
         dbgNotime("Launching Witcher Online for The Witcher 3: Wild Hunt...\n");
@@ -102,8 +108,15 @@ public class WitcherServer
 
         if (svgEnabled)
         {
-            dbg("Starting Witcher Online status SVG server on *:%d\n", svgPort);
-            dbg("Status SVG: http://127.0.0.1:%d/status.svg\n", svgPort);
+            dbg("Starting Witcher Online status SVG server on %s:%d\n", svgBind, svgPort);
+            dbg("Status SVG: http://%s:%d/status.svg\n",
+                    "0.0.0.0".equals(svgBind) ? "127.0.0.1" : svgBind,
+                    svgPort);
+            if (!"127.0.0.1".equals(svgBind) && !"localhost".equalsIgnoreCase(svgBind))
+            {
+                dbg("WARNING: status HTTP bound to %s — lock down TCP %d on the firewall (R10)\n",
+                        svgBind, svgPort);
+            }
         }
 
         dbg("For help, type \"help\" or \"?\"\n");
@@ -138,9 +151,11 @@ public class WitcherServer
         return DEFAULT_STATUS_PORT;
     }
 
-    private static HttpServer startStatusServer(int statusPort) throws IOException
+    private static HttpServer startStatusServer(String bindHost, int statusPort) throws IOException
     {
-        HttpServer server = HttpServer.create(new InetSocketAddress(statusPort), 0);
+        String host = (bindHost == null || bindHost.isBlank()) ? "127.0.0.1" : bindHost.trim();
+        InetSocketAddress address = new InetSocketAddress(host, statusPort);
+        HttpServer server = HttpServer.create(address, 0);
 
         server.createContext("/status.svg", WitcherServer::handleStatusSvg);
         server.createContext("/players.svg", WitcherServer::handleStatusSvg);
@@ -1878,6 +1893,22 @@ public class WitcherServer
 
         String lower = value.trim().toLowerCase(Locale.ROOT);
         return lower.equals("true") || lower.equals("1") || lower.equals("yes") || lower.equals("on");
+    }
+
+    private static String readString(Properties properties, String key, String defaultValue)
+    {
+        if (properties == null)
+        {
+            return defaultValue;
+        }
+
+        String value = properties.getProperty(key);
+        if (value == null)
+        {
+            return defaultValue;
+        }
+
+        return value.trim();
     }
 
     private static Path serverPropertiesPath()

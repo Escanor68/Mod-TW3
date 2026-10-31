@@ -53,7 +53,7 @@ No router port-forward. Works behind CGNAT.
 2. Install **JDK 21+**. Place `WitcherServer.jar` (and optional `server.properties`) in a folder; run e.g. `java -jar WitcherServer.jar` (or `java -jar WitcherServer.jar 40000`).
 3. Open **UDP 40000** on the cloud firewall **and** the OS firewall (`ufw allow 40000/udp`, security group, etc.).
 4. Players set `ServerIP` to the VPS public IP and `Port` to `40000`.
-5. Optional: enable `svgEnabled=true` and open TCP **40001** only if you want `/status.json` publicly (lock it down if exposed).
+5. Optional: enable `svgEnabled=true`. Status HTTP binds to **`127.0.0.1`** by default (`svgBind`). To expose it, set `svgBind=0.0.0.0` **and** lock down TCP **40001** on the firewall.
 
 **Tradeoff:** monthly cost + you operate the box; no VPN required for players.
 

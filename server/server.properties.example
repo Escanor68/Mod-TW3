@@ -7,3 +7,5 @@ whitelist=false
 # Optional HTTP status (SVG/JSON). Default status port is 40001.
 svgEnabled=false
 # svgPort=40001
+# Bind defaults to loopback (R10). Use 0.0.0.0 only if intentionally public + firewalled.
+svgBind=127.0.0.1

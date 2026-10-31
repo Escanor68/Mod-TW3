@@ -16,7 +16,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R7 | Client-authoritative combat / cheating | F4 combat-authority | high | mitigating | Server `authHealth` + HIT/HITACK; local animations can still play; dual-client T4 open |
 | R8 | Item duping via local saves | F5 shared-persistence | high | mitigating | Crowns+key-bag server snapshot; covered qty overwrite; full inventory still local |
 | R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | resolved | Interest radius 100u + party exception; heartbeat logs interest vs baseline (`092924f`) |
-| R10 | Exposing status HTTP (40001) on public VPS | F0 ops | low | open | Runbook: enable only if locked down |
+| R10 | Exposing status HTTP (40001) on public VPS | F0 ops | low | resolved | Default `svgBind=127.0.0.1`; public bind requires explicit `svgBind` + firewall |
 | R11 | Party time/weather failed when leader ghost not spawned | F2 party-world-slice | medium | resolved | Store UPDATE4 world fields on global player; fallback in `updateWorldSync` |
 | R12 | In-game dual-client proof unavailable in this environment | F2 / F0 | medium | accepted | Manual checklists; operator runs acceptance on TW3 clients |
 | R13 | Publishing WitcherOnline work into Mod-TW3 must not wipe existing Witcher3-MP `main` | delivery | high | accepted | User authorized force-replace of `main` with WitcherOnline line (`ddf2cae`); prior Witcher3-MP `main` overwritten |
@@ -33,6 +33,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R8 mitigating** during F5: crowns+key-bag TSV snapshots; covered items overwrite on load.
 - 2026-10-31 — **R9 mitigating** during F6: interest radius + party exception; heartbeat compares interest vs baseline.
 - 2026-10-31 — **R9 resolved**: F6 interest slice accepted; residual multi-process shards remain out of scope.
+- 2026-10-31 — **R10 resolved**: status HTTP defaults to loopback bind (`svgBind`).
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use
