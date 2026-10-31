@@ -22,3 +22,4 @@ Objective: Close remaining open/mitigating rows in `odd/risks.md` — **one risk
 ## Log
 
 - L1: "vamos ahora en otra rama con los risks por cada commit se resuelve uno solo"
+- L2: 2026-10-31 — Closed R9,R10,R2,R1,R6,R7,R8,R5 one commit each on feat/risk-register.
