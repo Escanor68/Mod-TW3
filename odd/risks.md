@@ -14,7 +14,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | F4 clamps HIT damage/range/cooldown; full packet auth still deferred |
 | R6 | NPC desync / no shared world | F3 npc-presence-sync | high | accepted | Party NPC ghosts shipped; residual shared visual + operator T5 checklist accepted for F3 slice |
 | R7 | Client-authoritative combat / cheating | F4 combat-authority | high | accepted | HIT/HITACK authHealth shipped; residual local anim + UDP forge (see R5) accepted for F4 slice |
-| R8 | Item duping via local saves | F5 shared-persistence | high | mitigating | Crowns+key-bag server snapshot; covered qty overwrite; full inventory still local |
+| R8 | Item duping via local saves | F5 shared-persistence | high | accepted | Crowns+key-bag server wins shipped; residual uncovered inventory stays local — accepted for F5 slice |
 | R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | resolved | Interest radius 100u + party exception; heartbeat logs interest vs baseline (`092924f`) |
 | R10 | Exposing status HTTP (40001) on public VPS | F0 ops | low | resolved | Default `svgBind=127.0.0.1`; public bind requires explicit `svgBind` + firewall |
 | R11 | Party time/weather failed when leader ghost not spawned | F2 party-world-slice | medium | resolved | Store UPDATE4 world fields on global player; fallback in `updateWorldSync` |
@@ -38,6 +38,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R1 accepted**: CGNAT/public reachability is an operator path (Tailscale/VPS); residual accepted for F0.
 - 2026-10-31 — **R6 accepted**: F3 party NPC slice closed; residual shared geralt_npc visual + in-game T5 accepted.
 - 2026-10-31 — **R7 accepted**: F4 PvP HIT slice closed; residual local animations and packet forge deferred to R5/ops.
+- 2026-10-31 — **R8 accepted**: F5 crowns/key-bag slice closed; full inventory/quest graph remains local residual.
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use

@@ -59,3 +59,7 @@ Key items (first slice allowlist): Swallow, White Honey, Thunderbolt, Tawny Owl,
 - Not full inventory / quest graph.
 - UDP still forgeable (R5); username-bound file is the trust boundary for this slice.
 - Item names outside the allowlist are not covered.
+
+## Residual risk (R8)
+
+Only crowns + allowlisted key items are server-authoritative. Other inventory can still diverge via local saves. Residual **accepted** for F5.
