@@ -79,6 +79,10 @@ Requires **JDK 21+** (source uses APIs newer than Java 8). See `server/README.md
 
 Bans, whitelist, kicks, username holds: [session-identity.md](session-identity.md).
 
+## Party time / weather / dialog
+
+Party-scoped world slice: [party-world-slice.md](party-world-slice.md).
+
 ## Out of scope (later ODD features)
 
 NPC sync, combat authority, shared persistence, sharding — see `odd/tasks/`.

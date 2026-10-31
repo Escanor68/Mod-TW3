@@ -814,7 +814,6 @@ statemachine class r_MultiplayerClient
 
     public function updateWorldSync()
     {
-        var newTime : GameTime;
         var remotePlayer : r_RemotePlayer;
         var globalPlayer : r_RemotePlayer;
         var now : float;
@@ -858,29 +857,21 @@ statemachine class r_MultiplayerClient
             return;
         }
 
+        // Prefer nearby ghost state; fall back to global party leader data for
+        // time/weather when the leader entity is not locally spawned.
+        if(remotePlayer)
+        {
+            applyPartyWorldTimeWeather(remotePlayer);
+        }
+        else
+        {
+            applyPartyWorldTimeWeather(globalPlayer);
+        }
+
         if(!remotePlayer)
         {
+            cancelPendingSyncedDialogChoice();
             return;
-        }
-
-        newTime = GameTimeCreate(remotePlayer.day, remotePlayer.hour, remotePlayer.minute, remotePlayer.second);
-
-        if(!isGameTimeCloseEnough(newTime, 90))
-        {
-            theGame.SetGameTime( newTime, true );
-        }
-
-        if(theGame.GetEngineTimeAsSeconds() >= nextWeatherSyncAt)
-        {
-            if(remotePlayer.weather != '' && remotePlayer.weather != 'none')
-            {
-                if(GetWeatherConditionName() != remotePlayer.weather)
-                {
-                    RequestWeatherChangeTo(remotePlayer.weather, 3, false);
-
-                    nextWeatherSyncAt = theGame.GetEngineTimeAsSeconds() + 6;
-                }
-            }
         }
 
         if(hasActiveDialogChoices() && remotePlayer.menuName == "InCutscene" && remotePlayer.dialogChoices.Size() > 0 && isRemotePlayerCloseForDialogSync(remotePlayer)
@@ -915,6 +906,36 @@ statemachine class r_MultiplayerClient
         else
         {
             cancelPendingSyncedDialogChoice();
+        }
+    }
+
+    private function applyPartyWorldTimeWeather(syncPlayer : r_RemotePlayer)
+    {
+        var newTime : GameTime;
+
+        if(!syncPlayer)
+        {
+            return;
+        }
+
+        newTime = GameTimeCreate(syncPlayer.day, syncPlayer.hour, syncPlayer.minute, syncPlayer.second);
+
+        if(!isGameTimeCloseEnough(newTime, 90))
+        {
+            theGame.SetGameTime( newTime, true );
+        }
+
+        if(theGame.GetEngineTimeAsSeconds() >= nextWeatherSyncAt)
+        {
+            if(syncPlayer.weather != '' && syncPlayer.weather != 'none')
+            {
+                if(GetWeatherConditionName() != syncPlayer.weather)
+                {
+                    RequestWeatherChangeTo(syncPlayer.weather, 3, false);
+
+                    nextWeatherSyncAt = theGame.GetEngineTimeAsSeconds() + 6;
+                }
+            }
         }
     }
 
@@ -4588,6 +4609,13 @@ statemachine class r_MultiplayerClient
         gp.lastInParty = inParty;
         gp.lastJoinedParty = joinedParty;
         gp.health = health;
+        // Keep world-sync fields on the global player too so party time/weather
+        // still apply when the leader ghost is not spawned nearby.
+        gp.weather = weather;
+        gp.day = day;
+        gp.hour = hour;
+        gp.minute = minute;
+        gp.second = second;
 
         p = hm_getRemotePlayer(playersByServerId, serverPlayerId);
 
