@@ -14,13 +14,13 @@ Acceptance: forged/local-only damage does not stick for covered cases; both clie
 
 ## Tasks
 
-- [x] T1 (S2, S4) — Inventory current combat-related packets/scripts — route: inline — status: done — commit: —
+- [x] T1 (S2, S4) — Inventory current combat-related packets/scripts — route: inline — status: done — commit: e1fb713
   - Pre-F4: no HIT path; combat was local. Surface: MOVE positions + UPDATE* + F3 NPC. New opcodes: `HIT` / `HITACK`, script poll `11`.
-- [x] T2 (S2, S3) — Define validation rules for slice — route: inline — status: done — commit: —
+- [x] T2 (S2, S3) — Define validation rules for slice — route: inline — status: done — commit: e1fb713
   - `CombatAuthorityRules`: clamp 0.01–0.35, 200ms cooldown, 8u range, HP 0..1.
-- [x] T3 (S3, S4) — Server validation + client apply path — route: inline — status: done — commit: —
+- [x] T3 (S3, S4) — Server validation + client apply path — route: inline — status: done — commit: e1fb713
   - Server `handleHitRequest`; DLL `hit`/`HITACK`; script publish + `applyCombatHitAck`.
-- [ ] T4 (S3) — Abuse + happy-path verification — route: inline — status: partial — commit: —
+- [ ] T4 (S3) — Abuse + happy-path verification — route: inline — status: partial — commit: e1fb713 (unit); dual-client open
   - Unit tests: `run-combat-authority-tests.sh`. Dual-client checklist in `docs/hosting/combat-authority.md` (operator-owned, same as F3 T5).
 
 ## Log
