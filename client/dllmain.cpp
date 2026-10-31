@@ -608,6 +608,40 @@ static bool SendTransportKeepaliveIfDue()
 	return sent;
 }
 
+static void ProcessNpc(const std::string &payload)
+{
+	// Script: "npc <npcKey> <template> <x> <y> <z> <yaw> <hp> <state>"
+	std::vector<std::string> fields;
+	size_t start = payload.find(' ');
+	if (start == std::string::npos)
+		return;
+
+	std::string rest = payload.substr(start + 1);
+	std::string cur;
+	for (char c : rest)
+	{
+		if (c == ' ')
+		{
+			if (!cur.empty())
+			{
+				fields.push_back(cur);
+				cur.clear();
+			}
+		}
+		else
+		{
+			cur += c;
+		}
+	}
+	if (!cur.empty())
+		fields.push_back(cur);
+
+	if (fields.size() < 8)
+		return;
+
+	SendUdpPacket(BuildPacket("NPC", BuildLocalPacketId(), fields), "NPC");
+}
+
 static void ProcessOutbound(const std::string &payload)
 {
 	const std::string tag = PayloadTag(payload);
@@ -618,7 +652,8 @@ static void ProcessOutbound(const std::string &payload)
 		return;
 	}
 
-	const bool scriptTransportPayload = tag == "move" || tag == "wo" || tag == "wo2" || tag == "wo3" || tag == "wo4" || tag == "presence" || tag == "presence_transition";
+	const bool scriptTransportPayload = tag == "move" || tag == "wo" || tag == "wo2" || tag == "wo3" || tag == "wo4"
+		|| tag == "presence" || tag == "presence_transition" || tag == "npc";
 
 	if (!scriptTransportPayload)
 		return;
@@ -641,6 +676,8 @@ static void ProcessOutbound(const std::string &payload)
 		ProcessPresence(payload, now);
 	else if (tag == "presence_transition")
 		ProcessMenuTransition(payload, now);
+	else if (tag == "npc")
+		ProcessNpc(payload);
 }
 
 static void QueueMovement(int playerId, const std::string &playerUsername, const std::vector<std::string> &movement)
@@ -719,6 +756,19 @@ static void QueueUpdate4(int playerId, const std::string &playerUsername, std::v
 	wo_native::PushInbound(std::move(message));
 }
 
+static void QueueNpc(int playerId, const std::string &playerUsername, std::vector<std::string> &&fields)
+{
+	if (playerId <= 0 || playerUsername.empty() || fields.size() < 8)
+		return;
+
+	wo_native::InboundMessage message;
+	message.opcode = wo_native::InboundOpcode::Npc;
+	message.playerId = playerId;
+	message.sender = playerUsername;
+	message.fields = std::move(fields);
+	wo_native::PushInbound(std::move(message));
+}
+
 static void HandleServerPacket(const std::string &msg)
 {
 	auto parts = SplitTabs(msg);
@@ -745,7 +795,8 @@ static void HandleServerPacket(const std::string &msg)
 	}
 
 	const std::string &opcode = parts[0];
-	if (opcode != "MOVE" && opcode != "UPDATE1A" && opcode != "UPDATE1B" && opcode != "UPDATE2A" && opcode != "UPDATE2B" && opcode != "UPDATE3" && opcode != "UPDATE4")
+	if (opcode != "MOVE" && opcode != "UPDATE1A" && opcode != "UPDATE1B" && opcode != "UPDATE2A" && opcode != "UPDATE2B"
+		&& opcode != "UPDATE3" && opcode != "UPDATE4" && opcode != "NPC")
 	{
 		return;
 	}
@@ -772,6 +823,12 @@ static void HandleServerPacket(const std::string &msg)
 	if (opcode == "MOVE")
 	{
 		QueueMovement(playerId, playerUsername, fields);
+		return;
+	}
+
+	if (opcode == "NPC")
+	{
+		QueueNpc(playerId, playerUsername, std::move(fields));
 		return;
 	}
 

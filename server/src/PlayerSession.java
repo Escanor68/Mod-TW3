@@ -15,6 +15,10 @@ public class PlayerSession
     public volatile List<String> update3Fields = Collections.emptyList();
     public volatile List<String> update4Fields = Collections.emptyList();
 
+    /** Parsed from UPDATE4 field 0/1 for party-scoped relays (F3). */
+    public volatile boolean inParty = false;
+    public volatile String joinedParty = "";
+
     public PlayerSession(int playerId, String username, ClientEndpoint endpoint, long lastSeen)
     {
         this.playerId = playerId;

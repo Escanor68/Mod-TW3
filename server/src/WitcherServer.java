@@ -504,7 +504,8 @@ public class WitcherServer
                 || "UPDATE2A".equals(opcode)
                 || "UPDATE2B".equals(opcode)
                 || "UPDATE3".equals(opcode)
-                || "UPDATE4".equals(opcode);
+                || "UPDATE4".equals(opcode)
+                || "NPC".equals(opcode);
     }
 
     private static boolean isInteger(String value)
@@ -734,6 +735,20 @@ public class WitcherServer
             return;
         }
 
+        if ("NPC".equals(opcode))
+        {
+            // npcKey template x y z yaw hp state
+            if (frozenFields.size() < 8)
+            {
+                return;
+            }
+
+            List<ClientEndpoint> partyRecipients = snapshotPartyRecipients(current);
+            int npcSent = broadcastChunk(socket, partyRecipients, current, "NPC", frozenFields);
+            totalPacketsSent.addAndGet(npcSent);
+            return;
+        }
+
         if ("UPDATE1A".equals(opcode))
         {
             current.update1AFields = frozenFields;
@@ -757,7 +772,24 @@ public class WitcherServer
         else if ("UPDATE4".equals(opcode))
         {
             current.update4Fields = frozenFields;
+            applyPartyFieldsFromUpdate4(current, frozenFields);
         }
+    }
+
+    private static void applyPartyFieldsFromUpdate4(PlayerSession session, List<String> fields)
+    {
+        if (fields == null || fields.size() < 2)
+        {
+            return;
+        }
+
+        session.inParty = PartyScopeRules.parseTruthy(fields.get(0));
+        String joined = fields.get(1) == null ? "" : fields.get(1).trim();
+        if (joined.equalsIgnoreCase("none"))
+        {
+            joined = "";
+        }
+        session.joinedParty = joined;
     }
 
     private static void cleanupLoop()
@@ -863,6 +895,45 @@ public class WitcherServer
         {
             unique.add(session.endpoint);
         }
+        return new ArrayList<>(unique);
+    }
+
+    /**
+     * Party-scoped recipients for F3 NPC relay (excludes the publisher endpoint).
+     * Solo publishers (party of one) yield an empty list — no broadcast.
+     */
+    private static List<ClientEndpoint> snapshotPartyRecipients(PlayerSession publisher)
+    {
+        Set<ClientEndpoint> unique = new HashSet<>();
+        if (publisher == null)
+        {
+            return new ArrayList<>();
+        }
+
+        for (PlayerSession session : players.values())
+        {
+            if (session == null || session.endpoint == null)
+            {
+                continue;
+            }
+
+            if (session.endpoint.equals(publisher.endpoint))
+            {
+                continue;
+            }
+
+            if (PartyScopeRules.sameParty(
+                    publisher.inParty,
+                    publisher.joinedParty,
+                    publisher.username,
+                    session.inParty,
+                    session.joinedParty,
+                    session.username))
+            {
+                unique.add(session.endpoint);
+            }
+        }
+
         return new ArrayList<>(unique);
     }
 

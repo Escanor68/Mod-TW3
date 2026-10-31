@@ -5562,6 +5562,61 @@ statemachine class r_MultiplayerClient
             WO_Float(15));
     }
 
+    // F3 party-scoped NPC presence (fields: npcKey template x y z yaw hp state).
+    // Spawn/apply is scaffolded — full entity lifecycle lands with dual-client verification.
+    function WO_ApplyNpc()
+    {
+        theGame.r_getMultiplayerClient().applyRemoteNpcPresence(
+            WO_PlayerId(),
+            WO_Username(),
+            WO_Str(0),
+            WO_Str(1),
+            WO_Float(2),
+            WO_Float(3),
+            WO_Float(4),
+            WO_Float(5),
+            WO_Float(6),
+            WO_Str(7));
+    }
+
+    public function applyRemoteNpcPresence(serverPlayerId : int, publisher : string, npcKey : string, templatePath : string,
+            x : float, y : float, z : float, yaw : float, hp : float, stateName : string)
+    {
+        // Scaffold: log via notification in debug builds only when key changes — avoid spam.
+        // Full ghost-NPC spawn will reuse remote player entity patterns in a follow-up slice.
+        if(npcKey == "" || templatePath == "")
+        {
+            return;
+        }
+
+        // Keep a lightweight breadcrumb for operators verifying the pipe end-to-end.
+        if(theGame.GetInGameConfigWrapper().GetVarValue('MPGhosts_Main', 'MPGhosts_DebugNpc'))
+        {
+            theGame.GetGuiManager().ShowNotification("NPC sync: " + publisher + " " + npcKey);
+        }
+    }
+
+    public function publishNpcPresence(npcKey : string, templatePath : string, pos : Vector, yaw : float, hp : float, stateName : string)
+    {
+        var payload : string;
+
+        if(npcKey == "" || templatePath == "")
+        {
+            return;
+        }
+
+        if(stateName == "")
+        {
+            stateName = "idle";
+        }
+
+        payload = "npc " + npcKey + " " + templatePath + " "
+            + pos.X + " " + pos.Y + " " + pos.Z + " "
+            + yaw + " " + hp + " " + stateName;
+
+        WO_Send(payload);
+    }
+
     function WO_PumpInbound(maxMessages : int)
     {
         var processed : int;
@@ -5599,6 +5654,10 @@ statemachine class r_MultiplayerClient
 
                 case 5:
                     WO_ApplyUpdate4();
+                    break;
+
+                case 10:
+                    WO_ApplyNpc();
                     break;
 
                 case 6:

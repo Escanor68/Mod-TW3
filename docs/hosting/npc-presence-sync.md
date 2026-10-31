@@ -1,45 +1,38 @@
-# NPC presence sync (F3) — inventory
+# NPC presence sync (F3)
 
-Status: **not implemented** for world NPCs (README). This doc maps what exists today before adding a slice.
+**Scope decision (T2):** **party-only** — NPC snapshots relay only to the publisher’s party (same model as F2 world sync).
 
-## Quick take
+## Protocol (T3)
 
-Today the stack syncs **other players** (ghosts). Tags named `presence` are **menu/status strings**, not NPC entities. There is **no** NPC opcode on the Java UDP server yet.
+### Script → DLL
+```
+npc <npcKey> <template> <x> <y> <z> <yaw> <hp> <state>
+```
+`WO_Send(...)` / `publishNpcPresence(...)`.
 
-## Layers
+### DLL → UDP
+```
+NPC\t<playerId>\t<username>\t<npcKey>\t<template>\t<x>\t<y>\t<z>\t<yaw>\t<hp>\t<state>
+```
 
-| Layer | What exists | NPC gap |
-|-------|-------------|---------|
-| WitcherScript | `client.ws` ghosts via `geralt_npc` / `female_npc` templates for **remote players** | No spawn/track of world NPCs/enemies for other clients |
-| Native DLL | `WO_Send` / `WO_Poll` / `WO_Tick`; outbound tags `move`,`wo`…`wo4`,`presence`,`presence_transition` | `presence*` = local menu status (`Teleporting`, `IngameMenu`), injected into UPDATE1 menu field |
-| Native Bridge API | `WNB_RegisterNative` — register script natives | No world-entity enumeration API in-tree |
-| Server | Opcodes `MOVE`, `UPDATE1A/B`…`UPDATE4` only | Must add new opcode(s) + relay/filter policy |
+### Server
+- Accepts opcode `NPC` (min 8 fields).
+- Parses party from `UPDATE4` fields `[0]=inParty`, `[1]=joinedParty`.
+- Broadcasts `NPC` only to **same party**, excluding publisher.
+- Solo players (party of one) → no relay.
 
-## Inbound opcodes (script `WO_Poll`)
+### DLL → Script
+`WO_Poll` opcode **10** → `WO_ApplyNpc` → `applyRemoteNpcPresence(...)`.
 
-| Code | Meaning |
-|------|---------|
-| 1 | Move |
-| 2–5 | Update1–4 |
-| 6–9 | UsernameTaken / Kicked / Banned / NotWhitelisted |
+Spawn of real entities is **scaffolded** (debug notification behind `MPGhosts_DebugNpc`); full ghost-NPC lifecycle is the next hardening pass (T4/T5 in-game).
 
-No slot reserved for NPC payloads yet.
+## Inventory reminder
 
-## Suggested first slice (pending product choice)
+`presence` / `presence_transition` tags remain **menu status**, not world NPCs.
 
-1. **Detect** nearby combat NPCs on the publishing client (script and/or future native hook).
-2. **Publish** compact snapshots: id/template, pos, yaw, anim/state, hp (minimal).
-3. **Relay** on server with a **scope filter** (party vs proximity — see decision below).
-4. **Apply** on receivers as ephemeral remote actors (not quest authority).
+## Manual checklist (T5)
 
-Out of scope for first slice: AI authority, quest NPC state, loot tables, full anim graphs.
-
-## Dependencies
-
-- F0 reachability, F2 party model (if party-scoped).
-- Windows MSVC build for client DLL changes.
-- Dual-client TW3 verification (R12).
-
-## Open product decision (blocks T3+)
-
-**Party-only** vs **proximity-global** broadcast of NPC snapshots — recorded in `odd/tasks/npc-presence-sync.md` T2.
+- [ ] A and B in same party; A publishes NPC → B receives opcode 10 / debug toast if debug on
+- [ ] C not in party → no NPC packet
+- [ ] A alone → no self-echo / no broadcast
+- [ ] After leave party → stop receiving
