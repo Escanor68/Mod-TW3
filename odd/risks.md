@@ -14,7 +14,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | F4 clamps HIT damage/range/cooldown; full packet auth still deferred |
 | R6 | NPC desync / no shared world | F3 npc-presence-sync | high | mitigating | Party NPC ghosts spawn; first slice uses shared geralt_npc visual; T5 in-game open |
 | R7 | Client-authoritative combat / cheating | F4 combat-authority | high | mitigating | Server `authHealth` + HIT/HITACK; local animations can still play; dual-client T4 open |
-| R8 | Item duping via local saves | F5 shared-persistence | high | open | Tracked in F5 |
+| R8 | Item duping via local saves | F5 shared-persistence | high | mitigating | Crowns+key-bag server snapshot; covered qty overwrite; full inventory still local |
 | R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | open | Tracked in F6 |
 | R10 | Exposing status HTTP (40001) on public VPS | F0 ops | low | open | Runbook: enable only if locked down |
 | R11 | Party time/weather failed when leader ghost not spawned | F2 party-world-slice | medium | resolved | Store UPDATE4 world fields on global player; fallback in `updateWorldSync` |
@@ -30,6 +30,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R13 resolved**: remote `mod-tw3` → branch `witcheronline-mmorpg` (https://github.com/Escanor68/Mod-TW3/tree/witcheronline-mmorpg).
 - 2026-10-31 — **R13 accepted (superseded)**: user asked to wipe prior `main` and force-push WitcherOnline (`ddf2cae`) to https://github.com/Escanor68/Mod-TW3/tree/main.
 - 2026-10-31 — **R7 mitigating** during F4: HIT/HITACK + `CombatAuthorityRules`; residual local anim + UDP forge (R5).
+- 2026-10-31 — **R8 mitigating** during F5: crowns+key-bag TSV snapshots; covered items overwrite on load.
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use
