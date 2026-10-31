@@ -15,10 +15,10 @@ Acceptance: two party clients see the same published NPC pipe (receive apply pat
 ## Tasks
 
 - [x] T1 (S2, S4) — Map native hook surface and current opcodes — route: inline — status: done — commit: 3fb23f9
-- [x] T2 (S1, S3) — Product refine: party-only vs proximity global — route: inline — status: done — commit: pending
+- [x] T2 (S1, S3) — Product refine: party-only vs proximity global — route: inline — status: done — commit: 7c92f59
   - User confirmed party-only ("perfecto" after recommendation).
-- [x] T3 (S3, S4) — Protocol + server relay for NPC presence slice — route: inline — status: done — commit: pending
-- [x] T4 (S3) — Client/script apply remote NPC presence — route: inline — status: partial — commit: pending
+- [x] T3 (S3, S4) — Protocol + server relay for NPC presence slice — route: inline — status: done — commit: 7c92f59
+- [x] T4 (S3) — Client/script apply remote NPC presence — route: inline — status: partial — commit: 7c92f59
   - Pipe end-to-end scaffolded; entity spawn deferred (debug flag).
 - [ ] T5 (S3) — Dual-client verification evidence — route: inline — status: pending — commit: —
 
