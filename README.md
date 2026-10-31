@@ -7,34 +7,28 @@
   </a>
 </div>
 
-**Witcher Online** is a mod that adds multiplayer to *The Witcher 3: Wild Hunt*, turning your single player experience into an MMO experience. Join servers to play with your friends, customize your character using [Custom Player Characters](https://www.nexusmods.com/witcher3/mods/5940) and relax in taverns using [Chill Out](https://www.nexusmods.com/witcher3/mods/6402). Play Gwent and join parties with other players. Chat with strangers and perform emotes to roleplay with other players. Complete quests alongside friends.
+**Witcher Online** is a mod that adds multiplayer to *The Witcher 3: Wild Hunt*. Join servers with friends, customize characters with [Custom Player Characters](https://www.nexusmods.com/witcher3/mods/5940), relax with [Chill Out](https://www.nexusmods.com/witcher3/mods/6402), play Gwent, party up, chat, and emote.
 
-## Getting started
-To play Witcher Online, go to the [nexus page](https://www.nexusmods.com/witcher3/mods/11590).
+This repository (`main`) carries the WitcherOnline line plus an **MMORPG-path** slice (hosting, identity, party world, NPC presence, combat authority, shared persistence, interest management). Tracking: `odd/tasks/`, risks: `odd/risks.md`.
 
-For general information, go to the [Witcher Online Wiki](https://rejuvenate.gitbook.io/witcheronline).
+## Quick path
 
-To host a server friends can join from outside your LAN (Tailscale or VPS), see [docs/hosting/dedicated-hosting.md](docs/hosting/dedicated-hosting.md). Building the Java server from this repo: [server/README.md](server/README.md).
+1. Playable build: [Nexus — Witcher Online](https://www.nexusmods.com/witcher3/mods/11590).
+2. Docs / wiki: [Witcher Online Wiki](https://rejuvenate.gitbook.io/witcheronline).
+3. Host friends outside your LAN: [docs/hosting/dedicated-hosting.md](docs/hosting/dedicated-hosting.md) (Tailscale or VPS).
+4. Build the Java server from source: [server/README.md](server/README.md) (**JDK 21+**).
 
-Special thanks to Werasik2aa for his [multiplayer implementation](https://github.com/werasik2aa/Witcher3-Multiplayer) which helped a lot.
+Special thanks to Werasik2aa for [Witcher3-Multiplayer](https://github.com/werasik2aa/Witcher3-Multiplayer).
 
 ## Features / Playguide
 
-Full movement, combat, and appearance sync with other players. Perform emotes and send chat to other players using the player menu or in-game console. Morph into various animals, ride horses and boats with other players.
+Full movement, combat, and appearance sync. Emotes and chat via player menu or console. Morphs, horses, boats, Gwent (Timed/Normal + bets), parties (time / weather / dialog).
 
-Sit down at tables and benches using Chill Out and change into any character in the game with Custom Player Characters.
-
-Play Gwent with other players, using the cards in your deck. Play Timed or Normal mode and place bets.
-
-Play in parties to synchronize time, weather, and dialog choices. NPC sync is **NOT** implemented.
-
-This mod is designed to turn *The Witcher 3* into an MMO experience, where you can see other players on the path.
-
-[Features](https://rejuvenate.gitbook.io/witcheronline/general-information/features)
+[Features](https://rejuvenate.gitbook.io/witcheronline/general-information/features) · [Playguide](https://rejuvenate.gitbook.io/witcheronline/general-information/playguide)
 
 ### MMO Experience
 
-Join the public server to wander the world with lots of other players.
+Join the public server to wander the world with other players.
 
 ![MMO Experience](assets/mmo.gif)
 
@@ -44,32 +38,32 @@ Sit down in taverns and other locations throughout the world.
 ![Chill Out](assets/chill.gif)
 
 ### Party System
-Join a party with other players to synchronize time, weather, and cutscene dialog choices.
+Join a party to synchronize time, weather, and dialog choices.
 
 ![Party System](assets/world.gif)
 
 ![Party System 2](assets/party.gif)
 
 ### Cutscene Sync
-Dialogue choices the party leader chooses are selected for all players in the party.
+Party leader dialog choices apply to party members.
 
 ![Cutscene Sync](assets/dialog.gif)
 
 ### Gwent Duels
 
-Play Gwent with other players, using your own decks.
+Play Gwent with other players using your decks.
 
 ![Gwent Duels](assets/gwent.gif)
 
 ### Player Riding
 
-Sit back and relax while other players drive you to your destination.
+Ride along while another player drives.
 
 ![Player Riding](assets/riding.gif)
 
 ### Vehicle Passengers
 
-Ride horses and boats with other players.
+Share horses and boats.
 
 ![Vehicle Passengers Horse](assets/horse.gif)
 
@@ -77,7 +71,7 @@ Ride horses and boats with other players.
 
 ### Item Trading
 
-Trade items with other players, for a price.
+Trade items with other players for a price.
 
 ![Item Trading](assets/trading.gif)
 
@@ -89,19 +83,29 @@ Transform into an owl, crow, fox, or cat.
 
 ### Emotes
 
-50+ player emotes, some using props.
+50+ player emotes, some with props.
 
 ![Emotes](assets/emotes.gif)
 
-Since only other player locations are synced (not quest progress, NPCs, or the world state), everyone can use their own save file safely.
+## Shared online slice (this `main`)
 
-You can still easily do a full playthrough with each other, just make the same dialog choices and complete quests at the same time as one another.
+Operator / developer notes under `docs/hosting/`:
 
-[Playguide](https://rejuvenate.gitbook.io/witcheronline/general-information/playguide)
+| Topic | Doc |
+|-------|-----|
+| Reachability (Tailscale / VPS) | [dedicated-hosting.md](docs/hosting/dedicated-hosting.md) |
+| Bans / whitelist / kicks | [session-identity.md](docs/hosting/session-identity.md) |
+| Party time / weather / dialog | [party-world-slice.md](docs/hosting/party-world-slice.md) |
+| Party NPC presence ghosts | [npc-presence-sync.md](docs/hosting/npc-presence-sync.md) |
+| Server-validated PvP hits | [combat-authority.md](docs/hosting/combat-authority.md) |
+| Crowns + key-item bag persistence | [shared-persistence.md](docs/hosting/shared-persistence.md) |
+| Proximity interest broadcasts | [world-instances.md](docs/hosting/world-instances.md) |
+
+**Still local / residual:** full quest graph, full inventory, and deep NPC AI are not fully server-owned. Dual-client in-game checklists are operator-run (`odd/risks.md`).
+
+Public hosts should set `authToken` in `server.properties` and matching `<AuthToken>` in client `config.xml`.
 
 ## Socials
-
-Join the Discord to report any bugs or issues you encounter with the mod.
 
 - [Discord](https://discord.gg/AGXXvGNnH8)
 - [Wolven Workshop](https://discord.com/invite/RzkhYYr7fk) (`#rejuvenate-rock-farm`)
@@ -110,6 +114,6 @@ Join the Discord to report any bugs or issues you encounter with the mod.
 - [Donate](https://ko-fi.com/rejuvenate)
 
 ## Credits
-- [rejuvenate7](https://github.com/rejuvenate7) - Lead developer
-- [x4lva](https://github.com/x4lva) - Co-developer, Gwent sync
-- [Flawkee](https://github.com/flawkee) - Co-developer, Native hook / NPC sync (in progress)
+- [rejuvenate7](https://github.com/rejuvenate7) — Lead developer
+- [x4lva](https://github.com/x4lva) — Co-developer, Gwent sync
+- [Flawkee](https://github.com/flawkee) — Co-developer, Native hook / NPC sync
