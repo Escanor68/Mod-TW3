@@ -71,7 +71,8 @@ Forward **UDP 40000** to the host LAN IP; friends use your public IP (or DynDNS)
 - [ ] Client `config.xml` `ServerIP`/`Port` match the reachable host.
 - [ ] Two distinct usernames join; both appear on the server (`list` / console help).
 
-Local automation helper (bind + config shape only): `docs/hosting/smoke-local.sh`.
+Local automation helper (bind + config shape only): `docs/hosting/smoke-local.sh`.  
+Logged play sessions (host/client + REPORT): [`tools/qa-session/README.md`](../../tools/qa-session/README.md).
 
 ## Build from this repository
 

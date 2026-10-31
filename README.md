@@ -110,6 +110,20 @@ Operator / developer notes under `docs/hosting/`:
 
 Public hosts should set `authToken` in `server.properties` and matching `<AuthToken>` in client `config.xml`.
 
+## QA session runner (you + a friend)
+
+Use **`tools/qa-session/`** to start the dedicated server (host), point the client config (friend), and collect logs into a zipable **REPORT**.
+
+| Who | Command |
+|-----|---------|
+| Host (Linux) | `./tools/qa-session/run-session.sh host` |
+| Host (Windows) | `tools\qa-session\run-session.bat host` |
+| Friend | `SERVER_IP=<host Tailscale IP> USERNAME=FriendName ./tools/qa-session/run-session.sh client` (or PowerShell equivalents) |
+
+**Different houses:** both install [Tailscale](https://tailscale.com/) on the same tailnet; host runs `host` mode and shares `tailscale ip -4`; friend runs `client` with that IP, then launches TW3. Full steps: [tools/qa-session/README.md](tools/qa-session/README.md). Reachability alternatives (VPS / port-forward): [docs/hosting/dedicated-hosting.md](docs/hosting/dedicated-hosting.md).
+
+Session folders under `qa-sessions/` are gitignored — zip the folder and send the REPORT back; do not commit tokens.
+
 ## License
 
 This repository ships under **GPL-3.0** (see [`LICENSE`](LICENSE)). That file was **not** changed in the MMORPG-path / Next Gen README updates; it remains the upstream license already on `main`.
