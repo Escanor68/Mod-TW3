@@ -657,6 +657,25 @@ static void ProcessHit(const std::string &payload)
 	SendUdpPacket(BuildPacket("HIT", BuildLocalPacketId(), fields), "HIT");
 }
 
+static void ProcessInvSave(const std::string &payload)
+{
+	// Script: "invsave <crowns> <bagBlob>"
+	std::vector<std::string> fields = SplitSpacesAfterTag(payload);
+	if (fields.size() < 2)
+		return;
+
+	SendUdpPacket(BuildPacket("INVSAVE", BuildLocalPacketId(), fields), "INVSAVE");
+}
+
+static void ProcessInvLoadReq(const std::string &payload)
+{
+	// Script: "invloadreq"
+	std::vector<std::string> fields;
+	fields.push_back("1");
+	SendUdpPacket(BuildPacket("INVLOADREQ", BuildLocalPacketId(), fields), "INVLOADREQ");
+	(void)payload;
+}
+
 static void ProcessOutbound(const std::string &payload)
 {
 	const std::string tag = PayloadTag(payload);
@@ -668,7 +687,8 @@ static void ProcessOutbound(const std::string &payload)
 	}
 
 	const bool scriptTransportPayload = tag == "move" || tag == "wo" || tag == "wo2" || tag == "wo3" || tag == "wo4"
-		|| tag == "presence" || tag == "presence_transition" || tag == "npc" || tag == "hit";
+		|| tag == "presence" || tag == "presence_transition" || tag == "npc" || tag == "hit"
+		|| tag == "invsave" || tag == "invloadreq";
 
 	if (!scriptTransportPayload)
 		return;
@@ -695,6 +715,10 @@ static void ProcessOutbound(const std::string &payload)
 		ProcessNpc(payload);
 	else if (tag == "hit")
 		ProcessHit(payload);
+	else if (tag == "invsave")
+		ProcessInvSave(payload);
+	else if (tag == "invloadreq")
+		ProcessInvLoadReq(payload);
 }
 
 static void QueueMovement(int playerId, const std::string &playerUsername, const std::vector<std::string> &movement)
@@ -799,6 +823,19 @@ static void QueueHitAck(int playerId, const std::string &playerUsername, std::ve
 	wo_native::PushInbound(std::move(message));
 }
 
+static void QueueInvLoad(int playerId, const std::string &playerUsername, std::vector<std::string> &&fields)
+{
+	if (playerId <= 0 || playerUsername.empty() || fields.size() < 3)
+		return;
+
+	wo_native::InboundMessage message;
+	message.opcode = wo_native::InboundOpcode::InvLoad;
+	message.playerId = playerId;
+	message.sender = playerUsername;
+	message.fields = std::move(fields);
+	wo_native::PushInbound(std::move(message));
+}
+
 static void HandleServerPacket(const std::string &msg)
 {
 	auto parts = SplitTabs(msg);
@@ -826,7 +863,7 @@ static void HandleServerPacket(const std::string &msg)
 
 	const std::string &opcode = parts[0];
 	if (opcode != "MOVE" && opcode != "UPDATE1A" && opcode != "UPDATE1B" && opcode != "UPDATE2A" && opcode != "UPDATE2B"
-		&& opcode != "UPDATE3" && opcode != "UPDATE4" && opcode != "NPC" && opcode != "HITACK")
+		&& opcode != "UPDATE3" && opcode != "UPDATE4" && opcode != "NPC" && opcode != "HITACK" && opcode != "INVLOAD")
 	{
 		return;
 	}
@@ -865,6 +902,12 @@ static void HandleServerPacket(const std::string &msg)
 	if (opcode == "HITACK")
 	{
 		QueueHitAck(playerId, playerUsername, std::move(fields));
+		return;
+	}
+
+	if (opcode == "INVLOAD")
+	{
+		QueueInvLoad(playerId, playerUsername, std::move(fields));
 		return;
 	}
 

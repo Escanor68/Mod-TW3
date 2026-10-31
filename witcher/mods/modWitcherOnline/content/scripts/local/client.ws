@@ -254,6 +254,15 @@ statemachine class r_MultiplayerClient
     private var nextCombatHitPublishAt : float;
     default nextCombatHitPublishAt = -999;
 
+    private var persistenceLoadRequested : bool;
+    default persistenceLoadRequested = false;
+    private var persistenceLoadApplied : bool;
+    default persistenceLoadApplied = false;
+    private var nextPersistenceSaveAt : float;
+    default nextPersistenceSaveAt = -999;
+    private var nextPersistenceLoadReqAt : float;
+    default nextPersistenceLoadReqAt = -999;
+
     public function WO_SetTeleporting(val : bool)
     {
         wo_isTeleporting = val;
@@ -5962,6 +5971,321 @@ statemachine class r_MultiplayerClient
             WO_Str(4));
     }
 
+    function WO_ApplyInvLoad()
+    {
+        theGame.r_getMultiplayerClient().applySharedPersistenceLoad(
+            WO_Str(0),
+            WO_Str(1),
+            WO_Str(2));
+    }
+
+    private function persistenceKeyItemNames() : array<name>
+    {
+        var names : array<name>;
+
+        names.PushBack('Swallow');
+        names.PushBack('White Honey');
+        names.PushBack('Thunderbolt');
+        names.PushBack('Tawny Owl');
+        names.PushBack('Blizzard');
+        names.PushBack('Petri Philter');
+        names.PushBack('Full Moon');
+        names.PushBack('Cat');
+        names.PushBack('Golden Oriole');
+        names.PushBack('Black Blood');
+        names.PushBack('Maribor Forest');
+        names.PushBack('Killer Whale');
+        return names;
+    }
+
+    private function persistenceWireItemName(itemName : name) : string
+    {
+        var raw : string;
+        var i : int;
+        var c : string;
+        var out : string;
+
+        raw = NameToString(itemName);
+        out = "";
+
+        for(i = 0; i < StrLen(raw); i += 1)
+        {
+            c = StrMid(raw, i, 1);
+
+            if(c == " ")
+            {
+                out += "+";
+            }
+            else
+            {
+                out += c;
+            }
+        }
+
+        return out;
+    }
+
+    private function persistenceNameFromWire(wireName : string) : name
+    {
+        var raw : string;
+        var i : int;
+        var c : string;
+        var out : string;
+
+        raw = wireName;
+        out = "";
+
+        for(i = 0; i < StrLen(raw); i += 1)
+        {
+            c = StrMid(raw, i, 1);
+
+            if(c == "+")
+            {
+                out += " ";
+            }
+            else
+            {
+                out += c;
+            }
+        }
+
+        return StringToName(out);
+    }
+
+    private function buildPersistenceBagBlob() : string
+    {
+        var inv : CInventoryComponent;
+        var names : array<name>;
+        var i : int;
+        var qty : int;
+        var blob : string;
+        var wire : string;
+        var entries : int;
+
+        inv = thePlayer.GetInventory();
+        names = persistenceKeyItemNames();
+        blob = "";
+        entries = 0;
+
+        for(i = 0; i < names.Size(); i += 1)
+        {
+            if(entries >= 12)
+            {
+                break;
+            }
+
+            qty = inv.GetItemQuantityByName(names[i]);
+
+            if(qty <= 0)
+            {
+                continue;
+            }
+
+            if(qty > 999)
+            {
+                qty = 999;
+            }
+
+            wire = persistenceWireItemName(names[i]);
+
+            if(blob != "")
+            {
+                blob += ";";
+            }
+
+            blob += wire + "=" + IntToString(qty);
+            entries += 1;
+        }
+
+        if(blob == "")
+        {
+            return "-";
+        }
+
+        return blob;
+    }
+
+    public function publishSharedPersistenceSave()
+    {
+        var crowns : int;
+        var bag : string;
+
+        if(!thePlayer)
+        {
+            return;
+        }
+
+        crowns = thePlayer.GetMoney();
+
+        if(crowns < 0)
+        {
+            crowns = 0;
+        }
+
+        bag = buildPersistenceBagBlob();
+        WO_Send("invsave " + IntToString(crowns) + " " + bag);
+    }
+
+    public function requestSharedPersistenceLoad()
+    {
+        WO_Send("invloadreq");
+        persistenceLoadRequested = true;
+    }
+
+    public function maybeSyncSharedPersistence()
+    {
+        var now : float;
+
+        now = theGame.GetEngineTimeAsSeconds();
+
+        if(!persistenceLoadRequested)
+        {
+            if(now >= nextPersistenceLoadReqAt)
+            {
+                nextPersistenceLoadReqAt = now + 2.0;
+                requestSharedPersistenceLoad();
+            }
+
+            return;
+        }
+
+        if(!persistenceLoadApplied)
+        {
+            return;
+        }
+
+        if(now < nextPersistenceSaveAt)
+        {
+            return;
+        }
+
+        nextPersistenceSaveAt = now + 15.0;
+        publishSharedPersistenceSave();
+    }
+
+    private function forceSetCoveredItemQuantity(itemName : name, qty : int)
+    {
+        var inv : CInventoryComponent;
+        var current : int;
+
+        inv = thePlayer.GetInventory();
+        current = inv.GetItemQuantityByName(itemName);
+
+        if(current > 0)
+        {
+            inv.RemoveItemByName(itemName, current);
+        }
+
+        if(qty > 0)
+        {
+            inv.AddAnItem(itemName, qty);
+        }
+    }
+
+    public function applySharedPersistenceLoad(status : string, crownsText : string, bagBlob : string)
+    {
+        var crowns : int;
+        var currentMoney : int;
+
+        persistenceLoadRequested = true;
+
+        if(status == "missing")
+        {
+            // No server snapshot yet — keep local slice and seed on next save.
+            persistenceLoadApplied = true;
+            nextPersistenceSaveAt = theGame.GetEngineTimeAsSeconds() + 1.0;
+            return;
+        }
+
+        if(status != "ok")
+        {
+            return;
+        }
+
+        crowns = StringToInt(crownsText);
+
+        if(crowns < 0)
+        {
+            crowns = 0;
+        }
+
+        if(thePlayer)
+        {
+            currentMoney = thePlayer.GetMoney();
+
+            if(currentMoney > 0)
+            {
+                thePlayer.RemoveMoney(currentMoney);
+            }
+
+            if(crowns > 0)
+            {
+                thePlayer.AddMoney(crowns);
+            }
+
+            if(bagBlob != "" && bagBlob != "-" && bagBlob != "none")
+            {
+                applyPersistenceBagBlob(bagBlob);
+            }
+        }
+
+        persistenceLoadApplied = true;
+        nextPersistenceSaveAt = theGame.GetEngineTimeAsSeconds() + 15.0;
+
+        if(theGame.GetInGameConfigWrapper().GetVarValue('MPGhosts_Main', 'MPGhosts_DebugPersist'))
+        {
+            theGame.GetGuiManager().ShowNotification("Persist load crowns=" + crownsText);
+        }
+    }
+
+    private function applyPersistenceBagBlob(bagBlob : string)
+    {
+        var remaining : string;
+        var entry : string;
+        var wireName : string;
+        var qtyText : string;
+        var qty : int;
+        var itemName : name;
+
+        remaining = bagBlob;
+
+        while(true)
+        {
+            if(!StrSplitFirst(remaining, ";", entry, remaining))
+            {
+                entry = remaining;
+                remaining = "";
+            }
+
+            if(entry != "" && StrSplitFirst(entry, "=", wireName, qtyText))
+            {
+                qty = StringToInt(qtyText);
+
+                if(qty < 0)
+                {
+                    qty = 0;
+                }
+
+                if(qty > 999)
+                {
+                    qty = 999;
+                }
+
+                itemName = persistenceNameFromWire(wireName);
+
+                if(itemName != '')
+                {
+                    forceSetCoveredItemQuantity(itemName, qty);
+                }
+            }
+
+            if(remaining == "")
+            {
+                break;
+            }
+        }
+    }
+
     public function applyCombatHitAck(targetUsername : string, newHealth : float, appliedDamage : float, hitType : string, attackerUsername : string)
     {
         var remote : r_RemotePlayer;
@@ -6060,6 +6384,10 @@ statemachine class r_MultiplayerClient
 
                 case 11:
                     WO_ApplyHitAck();
+                    break;
+
+                case 12:
+                    WO_ApplyInvLoad();
                     break;
 
                 case 6:
@@ -8040,6 +8368,7 @@ state WO_Tick in r_MultiplayerClient
             parent.publishLocalHostileNpcTarget();
             parent.pruneRemoteNpcPresence();
             parent.maybePublishCombatHitOnTarget();
+            parent.maybeSyncSharedPersistence();
             parent.updateLeaderDialogReadyPopup();
             MP_SU_moveMinimapPins();
 

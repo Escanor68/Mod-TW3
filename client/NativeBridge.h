@@ -18,7 +18,8 @@ namespace wo_native
 		Banned = 8,
 		NotWhitelisted = 9,
 		Npc = 10,
-		HitAck = 11
+		HitAck = 11,
+		InvLoad = 12
 	};
 
 	struct InboundMessage

@@ -61,6 +61,8 @@ public class WitcherServer
 
     private static final AtomicInteger nextPlayerId = new AtomicInteger(1);
 
+    private static volatile SharedPersistenceStore persistenceStore = null;
+
     public static void main(String[] args) throws Exception
     {
         Properties serverProperties = loadServerProperties();
@@ -69,12 +71,17 @@ public class WitcherServer
 
         loadBannedIps();
         loadWhitelistIps();
+        persistenceStore = new SharedPersistenceStore(playerSnapshotsPath());
+        persistenceStore.load();
 
         dbg("Session identity: bans=%d whitelistEnabled=%s whitelistedIps=%d usernameHoldSec=%d\n",
                 bannedIps.size(),
                 whitelistEnabled.get(),
                 whitelistedIps.size(),
                 USERNAME_HOLD_NANOS / 1_000_000_000L);
+        dbg("Shared persistence: snapshots=%d path=%s\n",
+                persistenceStore.size(),
+                playerSnapshotsPath());
 
         DatagramSocket socket = new DatagramSocket(port);
 
@@ -506,7 +513,9 @@ public class WitcherServer
                 || "UPDATE3".equals(opcode)
                 || "UPDATE4".equals(opcode)
                 || "NPC".equals(opcode)
-                || "HIT".equals(opcode);
+                || "HIT".equals(opcode)
+                || "INVSAVE".equals(opcode)
+                || "INVLOADREQ".equals(opcode);
     }
 
     private static boolean isInteger(String value)
@@ -744,6 +753,18 @@ public class WitcherServer
             return;
         }
 
+        if ("INVSAVE".equals(opcode))
+        {
+            handleInvSave(current, frozenFields);
+            return;
+        }
+
+        if ("INVLOADREQ".equals(opcode))
+        {
+            handleInvLoadReq(socket, current);
+            return;
+        }
+
         if ("NPC".equals(opcode))
         {
             // npcKey template x y z yaw hp state
@@ -912,6 +933,76 @@ public class WitcherServer
 
         dbg("HITACK %s -> %s dmg=%.3f hp=%.3f type=%s\n",
                 attacker.username, target.username, damage, newHealth, hitType);
+    }
+
+    /**
+     * INVSAVE fields: crowns, bagBlob ({@code Name=qty;...} or {@code -}).
+     * Replaces the whole covered slice for this username (server-wins / anti-dupe).
+     */
+    private static void handleInvSave(PlayerSession session, List<String> fields)
+    {
+        if (session == null || fields == null || fields.size() < 2 || persistenceStore == null)
+        {
+            return;
+        }
+
+        long crowns;
+        try
+        {
+            crowns = Long.parseLong(fields.get(0).trim());
+        }
+        catch (NumberFormatException e)
+        {
+            return;
+        }
+
+        String bagBlob = fields.get(1) == null ? SharedPersistenceRules.EMPTY_BAG : fields.get(1).trim();
+        SharedPersistenceStore.Snapshot snap = persistenceStore.putReplace(session.username, crowns, bagBlob);
+        if (snap == null)
+        {
+            return;
+        }
+
+        dbg("INVSAVE %s crowns=%d bag=%s\n", session.username, snap.crowns, snap.bagBlob);
+    }
+
+    /**
+     * Unicast INVLOAD: status({@code ok}|{@code missing}), crowns, bagBlob.
+     * {@code missing} → client keeps local slice and seeds with INVSAVE.
+     */
+    private static void handleInvLoadReq(DatagramSocket socket, PlayerSession session)
+    {
+        if (session == null || session.endpoint == null || persistenceStore == null)
+        {
+            return;
+        }
+
+        String key = SessionIdentityRules.normalizeUsernameKey(session.username);
+        SharedPersistenceStore.Snapshot snap = persistenceStore.get(key);
+
+        List<String> ack = new ArrayList<>();
+        if (snap == null)
+        {
+            ack.add("missing");
+            ack.add("0");
+            ack.add(SharedPersistenceRules.EMPTY_BAG);
+        }
+        else
+        {
+            ack.add("ok");
+            ack.add(Long.toString(snap.crowns));
+            ack.add(snap.bagBlob);
+        }
+
+        String packetText = buildTypedPacket(
+                "INVLOAD",
+                session.playerId,
+                session.username,
+                Collections.unmodifiableList(ack));
+        safeSend(socket, session.endpoint, packetText);
+        totalPacketsSent.incrementAndGet();
+        dbg("INVLOAD %s status=%s crowns=%s bag=%s\n",
+                session.username, ack.get(0), ack.get(1), ack.get(2));
     }
 
     private static void cleanupLoop()
@@ -1716,6 +1807,11 @@ public class WitcherServer
     private static Path serverPropertiesPath()
     {
         return appDir().resolve("server.properties");
+    }
+
+    private static Path playerSnapshotsPath()
+    {
+        return appDir().resolve("player-snapshots.tsv");
     }
 
     private static Path bannedPlayersPath()
