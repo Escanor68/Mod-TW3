@@ -14,10 +14,10 @@ Acceptance: party of ≥2 observes matching time/weather and leader dialog choic
 
 ## Tasks
 
-- [x] T1 (S2, S3) — Inventory current party sync scripts/packets — route: inline — status: done — commit: pending
-- [x] T2 (S1, S2, S4) — Close gaps for time/weather/dialog reliability — route: inline — status: done — commit: pending
+- [x] T1 (S2, S3) — Inventory current party sync scripts/packets — route: inline — status: done — commit: f2fd6ea
+- [x] T2 (S1, S2, S4) — Close gaps for time/weather/dialog reliability — route: inline — status: done — commit: f2fd6ea
   - Store world fields on global player; fall back in `updateWorldSync` when ghost missing.
-- [x] T3 (S2) — Manual acceptance checklist + run evidence — route: inline — status: partial — commit: pending
+- [x] T3 (S2) — Manual acceptance checklist + run evidence — route: inline — status: partial — commit: f2fd6ea
   - Checklist published; in-game dual-client evidence still operator-owned (no TW3 runtime here).
 
 ## Log
