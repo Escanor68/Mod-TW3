@@ -14,13 +14,13 @@ Acceptance: disconnect/reconnect restores the agreed persisted slice from server
 
 ## Tasks
 
-- [x] T1 (S2, S3) — Product decision: which fields persist + conflict rules (blocking) — route: inline — status: done — commit: —
+- [x] T1 (S2, S3) — Product decision: which fields persist + conflict rules (blocking) — route: inline — status: done — commit: a5e0f65
   - User confirmed: crowns + key bag; server wins; overwrite anti-dupe ("si, la cerramos con esa regla").
-- [x] T2 (S2, S4) — Storage choice + schema/migration plan — route: inline — status: done — commit: —
+- [x] T2 (S2, S4) — Storage choice + schema/migration plan — route: inline — status: done — commit: a5e0f65
   - `player-snapshots.tsv` via `SharedPersistenceStore` (no DB).
-- [x] T3 (S2, S4) — Load/save protocol + server APIs — route: inline — status: done — commit: —
+- [x] T3 (S2, S4) — Load/save protocol + server APIs — route: inline — status: done — commit: a5e0f65
   - `INVSAVE` / `INVLOADREQ` / `INVLOAD` + script/DLL apply path.
-- [ ] T4 (S2) — Reconnect + anti-dupe verification — route: inline — status: partial — commit: —
+- [ ] T4 (S2) — Reconnect + anti-dupe verification — route: inline — status: partial — commit: a5e0f65 (unit); dual-client open
   - Unit tests green; dual-client checklist in `docs/hosting/shared-persistence.md` (operator-owned / R12).
 
 ## Log
