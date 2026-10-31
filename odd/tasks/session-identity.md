@@ -14,12 +14,12 @@ Acceptance: reconnect with same username reattaches predictably; banned IP/user 
 
 ## Tasks
 
-- [x] T1 (S2) — Map current ban/whitelist/username reservation behavior — route: inline — status: done — commit: pending
-- [x] T2 (S1, S3) — Spec gaps vs desired operator UX; implement minimal hardening — route: inline — status: done — commit: pending
+- [x] T1 (S2) — Map current ban/whitelist/username reservation behavior — route: inline — status: done — commit: 96d9092
+- [x] T2 (S1, S3) — Spec gaps vs desired operator UX; implement minimal hardening — route: inline — status: done — commit: 96d9092
   - Fixed whitelist already-in-list log bug; persist whitelist on/off; `bans` / `reserved` / `whitelist list`; `SessionIdentityRules` + startup identity summary.
-- [x] T3 (S3, S4) — Verification matrix (ban, whitelist, name hold, kick) — route: inline — status: done — commit: pending
+- [x] T3 (S3, S4) — Verification matrix (ban, whitelist, name hold, kick) — route: inline — status: done — commit: 96d9092
   - Docs matrix + automated rules tests. Live UDP join matrix remains operator (needs running game clients).
-- [x] T4 (S5) — Operator notes linked from F0 runbook — route: inline — status: done — commit: pending
+- [x] T4 (S5) — Operator notes linked from F0 runbook — route: inline — status: done — commit: 96d9092
 
 ## Log
 
