@@ -32,6 +32,11 @@ public class PlayerSession
     /** Shared-secret UDP auth (R5). True when server token empty or AUTH succeeded. */
     public volatile boolean authenticated = true;
 
+    /** F7 story-room cast: species token (GERALT/HUMAN/ELF/WITCHER/SORCERESS or free-pick). */
+    public volatile String roomSpecies = "";
+    /** F7 reported character level for Geralt seat transfer (highest level wins). */
+    public volatile int characterLevel = 0;
+
     public PlayerSession(int playerId, String username, ClientEndpoint endpoint, long lastSeen)
     {
         this.playerId = playerId;

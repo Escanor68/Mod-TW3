@@ -19,7 +19,8 @@ namespace wo_native
 		NotWhitelisted = 9,
 		Npc = 10,
 		HitAck = 11,
-		InvLoad = 12
+		InvLoad = 12,
+		RoomState = 13
 	};
 
 	struct InboundMessage

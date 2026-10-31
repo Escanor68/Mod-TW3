@@ -258,6 +258,16 @@ statemachine class r_MultiplayerClient
     default persistenceLoadRequested = false;
     private var persistenceLoadApplied : bool;
     default persistenceLoadApplied = false;
+
+    /** F7 story-room state from server ROOMSTATE. */
+    private var roomModeWire : string;
+    default roomModeWire = "STORY";
+    private var roomOwnerName : string;
+    default roomOwnerName = "";
+    private var roomSpeciesWire : string;
+    default roomSpeciesWire = "";
+    private var roomLevelWire : int;
+    default roomLevelWire = 0;
     private var nextPersistenceSaveAt : float;
     default nextPersistenceSaveAt = -999;
     private var nextPersistenceLoadReqAt : float;
@@ -5979,6 +5989,15 @@ statemachine class r_MultiplayerClient
             WO_Str(2));
     }
 
+    function WO_ApplyRoomState()
+    {
+        theGame.r_getMultiplayerClient().applyRoomState(
+            WO_Str(0),
+            WO_Str(1),
+            WO_Str(2),
+            StringToInt(WO_Str(3)));
+    }
+
     private function persistenceKeyItemNames() : array<name>
     {
         var names : array<name>;
@@ -6130,6 +6149,81 @@ statemachine class r_MultiplayerClient
     {
         WO_Send("invloadreq");
         persistenceLoadRequested = true;
+    }
+
+    public function applyRoomState(modeWire : string, ownerName : string, speciesWire : string, levelWire : int)
+    {
+        roomModeWire = modeWire;
+        roomOwnerName = ownerName;
+        roomSpeciesWire = speciesWire;
+        roomLevelWire = levelWire;
+    }
+
+    public function getRoomModeWire() : string
+    {
+        return roomModeWire;
+    }
+
+    public function getRoomOwnerName() : string
+    {
+        return roomOwnerName;
+    }
+
+    public function isContractsRoomMode() : bool
+    {
+        return roomModeWire == "CONTRACTS";
+    }
+
+    /** Map known CPC types to F7 story species; otherwise free-pick token for contracts mode. */
+    public function mapCpcToRoomSpecies() : string
+    {
+        var cpcPlayerType : ENR_PlayerType;
+
+        cpcPlayerType = NR_GetPlayerManager().GetCurrentPlayerType();
+
+        if(cpcPlayerType == ENR_PlayerGeralt)
+        {
+            return "GERALT";
+        }
+
+        if(cpcPlayerType == ENR_PlayerWitcher)
+        {
+            return "WITCHER";
+        }
+
+        if(cpcPlayerType == ENR_PlayerSorceress)
+        {
+            return "SORCERESS";
+        }
+
+        // HUMAN / ELF need explicit CPC enum names from the CPC mod; until then use type ordinal free-pick.
+        return "CPC" + IntToString((int)cpcPlayerType);
+    }
+
+    public function claimRoomRole(optional levelOverride : int)
+    {
+        var species : string;
+        var level : int;
+
+        species = mapCpcToRoomSpecies();
+        level = levelOverride;
+
+        if(level < 0)
+        {
+            level = 0;
+        }
+
+        WO_Send("roleclaim " + species + " " + IntToString(level));
+    }
+
+    public function declareHistoriaTerminada()
+    {
+        WO_Send("storydone");
+    }
+
+    public function requestRoomState()
+    {
+        WO_Send("roomstatereq");
     }
 
     public function maybeSyncSharedPersistence()
@@ -6388,6 +6482,10 @@ statemachine class r_MultiplayerClient
 
                 case 12:
                     WO_ApplyInvLoad();
+                    break;
+
+                case 13:
+                    WO_ApplyRoomState();
                     break;
 
                 case 6:

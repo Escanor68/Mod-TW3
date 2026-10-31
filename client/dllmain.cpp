@@ -697,6 +697,34 @@ static void ProcessAuth(const std::string &payload)
 	SendUdpPacket(BuildPacket("AUTH", BuildLocalPacketId(), fields), "AUTH");
 }
 
+static void ProcessRoleClaim(const std::string &payload)
+{
+	// Script: "roleclaim <species> [level]"
+	std::vector<std::string> fields = SplitSpacesAfterTag(payload);
+	if (fields.empty())
+		return;
+
+	SendUdpPacket(BuildPacket("ROLECLAIM", BuildLocalPacketId(), fields), "ROLECLAIM");
+}
+
+static void ProcessStoryDone(const std::string &payload)
+{
+	// Script: "storydone"
+	std::vector<std::string> fields;
+	fields.push_back("1");
+	SendUdpPacket(BuildPacket("STORYDONE", BuildLocalPacketId(), fields), "STORYDONE");
+	(void)payload;
+}
+
+static void ProcessRoomStateReq(const std::string &payload)
+{
+	// Script: "roomstatereq"
+	std::vector<std::string> fields;
+	fields.push_back("1");
+	SendUdpPacket(BuildPacket("ROOMSTATEREQ", BuildLocalPacketId(), fields), "ROOMSTATEREQ");
+	(void)payload;
+}
+
 static void ProcessOutbound(const std::string &payload)
 {
 	const std::string tag = PayloadTag(payload);
@@ -709,7 +737,8 @@ static void ProcessOutbound(const std::string &payload)
 
 	const bool scriptTransportPayload = tag == "move" || tag == "wo" || tag == "wo2" || tag == "wo3" || tag == "wo4"
 		|| tag == "presence" || tag == "presence_transition" || tag == "npc" || tag == "hit"
-		|| tag == "invsave" || tag == "invloadreq" || tag == "auth";
+		|| tag == "invsave" || tag == "invloadreq" || tag == "auth"
+		|| tag == "roleclaim" || tag == "storydone" || tag == "roomstatereq";
 
 	if (!scriptTransportPayload)
 		return;
@@ -742,6 +771,12 @@ static void ProcessOutbound(const std::string &payload)
 		ProcessInvLoadReq(payload);
 	else if (tag == "auth")
 		ProcessAuth(payload);
+	else if (tag == "roleclaim")
+		ProcessRoleClaim(payload);
+	else if (tag == "storydone")
+		ProcessStoryDone(payload);
+	else if (tag == "roomstatereq")
+		ProcessRoomStateReq(payload);
 }
 
 static void QueueMovement(int playerId, const std::string &playerUsername, const std::vector<std::string> &movement)
@@ -859,6 +894,19 @@ static void QueueInvLoad(int playerId, const std::string &playerUsername, std::v
 	wo_native::PushInbound(std::move(message));
 }
 
+static void QueueRoomState(int playerId, const std::string &playerUsername, std::vector<std::string> &&fields)
+{
+	if (playerId <= 0 || playerUsername.empty() || fields.size() < 3)
+		return;
+
+	wo_native::InboundMessage message;
+	message.opcode = wo_native::InboundOpcode::RoomState;
+	message.playerId = playerId;
+	message.sender = playerUsername;
+	message.fields = std::move(fields);
+	wo_native::PushInbound(std::move(message));
+}
+
 static void HandleServerPacket(const std::string &msg)
 {
 	auto parts = SplitTabs(msg);
@@ -867,6 +915,12 @@ static void HandleServerPacket(const std::string &msg)
 
 	if (parts[0] == "ERROR")
 	{
+		if (parts.size() >= 2 && (parts[1].rfind("ROLE_", 0) == 0 || parts[1].rfind("STORYDONE_", 0) == 0))
+		{
+			// Soft room-role errors — keep the UDP session open.
+			return;
+		}
+
 		if (parts.size() >= 2 && parts[1] == "USERNAME_TAKEN")
 			wo_native::PushControl(wo_native::InboundOpcode::UsernameTaken);
 		else if (parts.size() >= 2 && parts[1] == "BANNED")
@@ -888,7 +942,8 @@ static void HandleServerPacket(const std::string &msg)
 
 	const std::string &opcode = parts[0];
 	if (opcode != "MOVE" && opcode != "UPDATE1A" && opcode != "UPDATE1B" && opcode != "UPDATE2A" && opcode != "UPDATE2B"
-		&& opcode != "UPDATE3" && opcode != "UPDATE4" && opcode != "NPC" && opcode != "HITACK" && opcode != "INVLOAD")
+		&& opcode != "UPDATE3" && opcode != "UPDATE4" && opcode != "NPC" && opcode != "HITACK" && opcode != "INVLOAD"
+		&& opcode != "ROOMSTATE")
 	{
 		return;
 	}
@@ -933,6 +988,12 @@ static void HandleServerPacket(const std::string &msg)
 	if (opcode == "INVLOAD")
 	{
 		QueueInvLoad(playerId, playerUsername, std::move(fields));
+		return;
+	}
+
+	if (opcode == "ROOMSTATE")
+	{
+		QueueRoomState(playerId, playerUsername, std::move(fields));
 		return;
 	}
 

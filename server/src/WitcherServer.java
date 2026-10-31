@@ -37,6 +37,8 @@ public class WitcherServer
     private static final Set<String> bannedIps = ConcurrentHashMap.newKeySet();
     private static final Set<String> whitelistedIps = ConcurrentHashMap.newKeySet();
     private static final Map<String, UsernameReservation> reservedUsernames = new ConcurrentHashMap<>();
+    /** F7 party room mode/owner keyed by {@link PartyScopeRules#partyKey}. */
+    private static final Map<String, PartyRoomState> partyRooms = new ConcurrentHashMap<>();
 
     private static final AtomicBoolean running = new AtomicBoolean(true);
     private static final AtomicBoolean whitelistEnabled = new AtomicBoolean(false);
@@ -86,6 +88,7 @@ public class WitcherServer
                 persistenceStore.size(),
                 playerSnapshotsPath());
         dbg("Packet auth: required=%s\n", PacketAuthRules.isRequired(requiredAuthToken));
+        dbg("Story room characters: ROLECLAIM / STORYDONE / ROOMSTATEREQ (F7)\n");
 
         DatagramSocket socket = new DatagramSocket(port);
 
@@ -535,7 +538,10 @@ public class WitcherServer
                 || "HIT".equals(opcode)
                 || "INVSAVE".equals(opcode)
                 || "INVLOADREQ".equals(opcode)
-                || "AUTH".equals(opcode);
+                || "AUTH".equals(opcode)
+                || "ROLECLAIM".equals(opcode)
+                || "STORYDONE".equals(opcode)
+                || "ROOMSTATEREQ".equals(opcode);
     }
 
     private static boolean isInteger(String value)
@@ -764,6 +770,24 @@ public class WitcherServer
         if (PacketAuthRules.isRequired(requiredAuthToken) && !current.authenticated)
         {
             safeSend(socket, sender, "ERROR\tAUTH_REQUIRED");
+            return;
+        }
+
+        if ("ROLECLAIM".equals(opcode))
+        {
+            handleRoleClaim(socket, current, frozenFields);
+            return;
+        }
+
+        if ("STORYDONE".equals(opcode))
+        {
+            handleStoryDone(socket, current);
+            return;
+        }
+
+        if ("ROOMSTATEREQ".equals(opcode))
+        {
+            sendRoomState(socket, current);
             return;
         }
 
@@ -1654,6 +1678,7 @@ public class WitcherServer
         if (removed != null)
         {
             safeSend(socket, removed.endpoint, kickText);
+            onPlayerLeftRoom(socket, removed);
         }
     }
 
@@ -2338,7 +2363,228 @@ public class WitcherServer
                 USERNAME_HOLD_NANOS / 1_000_000_000L,
                 ip);
 
+        onPlayerLeftRoom(null, session);
+
         return true;
+    }
+
+    private static PartyRoomState roomFor(PlayerSession session)
+    {
+        String key = PartyScopeRules.partyKey(session.inParty, session.joinedParty, session.username);
+        return partyRooms.computeIfAbsent(key, k -> new PartyRoomState());
+    }
+
+    private static String partyKeyOf(PlayerSession session)
+    {
+        return PartyScopeRules.partyKey(session.inParty, session.joinedParty, session.username);
+    }
+
+    private static List<PlayerSession> snapshotPartyMembers(PlayerSession session)
+    {
+        List<PlayerSession> out = new ArrayList<>();
+        for (PlayerSession other : players.values())
+        {
+            if (other == null)
+            {
+                continue;
+            }
+
+            if (PartyScopeRules.sameParty(
+                    session.inParty, session.joinedParty, session.username,
+                    other.inParty, other.joinedParty, other.username))
+            {
+                out.add(other);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * ROLECLAIM fields: species, optional level.
+     * Story: GERALT claims owner if free; support species allowed; second Geralt owner rejected.
+     * Contracts: any species token allowed (free pick).
+     */
+    private static void handleRoleClaim(DatagramSocket socket, PlayerSession session, List<String> fields)
+    {
+        if (fields == null || fields.isEmpty())
+        {
+            safeSend(socket, session.endpoint, "ERROR\tROLE_INVALID");
+            return;
+        }
+
+        String species = RoomCharacterRules.normalizeSpecies(fields.get(0));
+        int level = fields.size() > 1
+                ? RoomCharacterRules.parseLevel(fields.get(1), session.characterLevel)
+                : session.characterLevel;
+
+        PartyRoomState room = roomFor(session);
+        RoomCharacterRules.RoomMode mode = room.mode;
+
+        if (!RoomCharacterRules.isAllowedSpecies(mode, species))
+        {
+            safeSend(socket, session.endpoint, "ERROR\tROLE_SPECIES");
+            return;
+        }
+
+        if (mode == RoomCharacterRules.RoomMode.STORY
+                && RoomCharacterRules.shouldRejectSecondGeraltOwner(room.hasOwner(), species))
+        {
+            String ownerKey = SessionIdentityRules.normalizeUsernameKey(room.ownerUsername);
+            String selfKey = SessionIdentityRules.normalizeUsernameKey(session.username);
+            if (!ownerKey.equals(selfKey))
+            {
+                safeSend(socket, session.endpoint, "ERROR\tROLE_OWNER_TAKEN");
+                return;
+            }
+        }
+
+        session.roomSpecies = species;
+        session.characterLevel = Math.max(0, level);
+
+        if (mode == RoomCharacterRules.RoomMode.STORY
+                && RoomCharacterRules.canClaimStoryOwner(room.hasOwner(), species))
+        {
+            room.ownerUsername = session.username;
+            dbg("F7 story owner claimed by %s\n", session.username);
+        }
+        else if (mode == RoomCharacterRules.RoomMode.STORY
+                && RoomCharacterRules.isOwnerSpecies(species)
+                && room.hasOwner()
+                && SessionIdentityRules.normalizeUsernameKey(room.ownerUsername)
+                .equals(SessionIdentityRules.normalizeUsernameKey(session.username)))
+        {
+            // Existing owner reaffirming Geralt.
+            room.ownerUsername = session.username;
+        }
+
+        broadcastRoomState(socket, session);
+    }
+
+    private static void handleStoryDone(DatagramSocket socket, PlayerSession session)
+    {
+        PartyRoomState room = roomFor(session);
+        boolean isOwner = room.hasOwner()
+                && SessionIdentityRules.normalizeUsernameKey(room.ownerUsername)
+                .equals(SessionIdentityRules.normalizeUsernameKey(session.username));
+
+        if (!RoomCharacterRules.canDeclareHistoriaTerminada(room.mode, isOwner))
+        {
+            safeSend(socket, session.endpoint, "ERROR\tSTORYDONE_DENIED");
+            return;
+        }
+
+        room.mode = RoomCharacterRules.modeAfterHistoriaTerminada();
+        dbg("F7 historia terminada by %s → CONTRACTS\n", session.username);
+        broadcastRoomState(socket, session);
+    }
+
+    private static String formatRoomStateLine(PlayerSession envelope, PartyRoomState room, PlayerSession member)
+    {
+        return "ROOMSTATE\t"
+                + envelope.playerId + "\t"
+                + escapeField(envelope.username) + "\t"
+                + RoomCharacterRules.modeWire(room.mode) + "\t"
+                + escapeField(room.ownerUsername == null ? "" : room.ownerUsername) + "\t"
+                + escapeField(member.roomSpecies == null ? "" : member.roomSpecies) + "\t"
+                + member.characterLevel;
+    }
+
+    private static void sendRoomState(DatagramSocket socket, PlayerSession session)
+    {
+        PartyRoomState room = roomFor(session);
+        safeSend(socket, session.endpoint, formatRoomStateLine(session, room, session));
+    }
+
+    private static void broadcastRoomState(DatagramSocket socket, PlayerSession session)
+    {
+        if (socket == null)
+        {
+            return;
+        }
+
+        PartyRoomState room = roomFor(session);
+
+        for (PlayerSession member : snapshotPartyMembers(session))
+        {
+            safeSend(socket, member.endpoint, formatRoomStateLine(member, room, member));
+        }
+    }
+
+    private static void onPlayerLeftRoom(DatagramSocket socket, PlayerSession left)
+    {
+        if (left == null)
+        {
+            return;
+        }
+
+        String key = partyKeyOf(left);
+        PartyRoomState room = partyRooms.get(key);
+        if (room == null)
+        {
+            return;
+        }
+
+        boolean wasOwner = room.hasOwner()
+                && SessionIdentityRules.normalizeUsernameKey(room.ownerUsername)
+                .equals(SessionIdentityRules.normalizeUsernameKey(left.username));
+
+        List<PlayerSession> remaining = new ArrayList<>();
+        for (PlayerSession other : players.values())
+        {
+            if (other == null || other == left)
+            {
+                continue;
+            }
+
+            if (PartyScopeRules.partyKey(other.inParty, other.joinedParty, other.username).equals(key)
+                    || PartyScopeRules.sameParty(
+                    left.inParty, left.joinedParty, left.username,
+                    other.inParty, other.joinedParty, other.username))
+            {
+                remaining.add(other);
+            }
+        }
+
+        if (remaining.isEmpty())
+        {
+            partyRooms.remove(key, room);
+            return;
+        }
+
+        if (room.mode == RoomCharacterRules.RoomMode.STORY && wasOwner)
+        {
+            List<RoomCharacterRules.MemberLevel> levels = new ArrayList<>();
+            for (PlayerSession m : remaining)
+            {
+                levels.add(new RoomCharacterRules.MemberLevel(m.username, m.characterLevel));
+            }
+
+            String nextOwner = RoomCharacterRules.pickHighestLevelUsername(levels);
+            if (!nextOwner.isEmpty())
+            {
+                room.ownerUsername = nextOwner;
+                for (PlayerSession m : remaining)
+                {
+                    if (SessionIdentityRules.normalizeUsernameKey(m.username)
+                            .equals(SessionIdentityRules.normalizeUsernameKey(nextOwner)))
+                    {
+                        m.roomSpecies = RoomCharacterRules.SPECIES_GERALT;
+                        dbg("F7 Geralt seat transferred to %s (level %d)\n",
+                                m.username, m.characterLevel);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                room.ownerUsername = "";
+            }
+        }
+
+        if (socket != null && !remaining.isEmpty())
+        {
+            broadcastRoomState(socket, remaining.get(0));
+        }
     }
 
     private static PlayerSession findPlayerById(int playerId)

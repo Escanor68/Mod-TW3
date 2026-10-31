@@ -23,10 +23,11 @@ java -jar out/WitcherServer.jar
 Console: type `help` or `?` for kick/ban/whitelist/stats commands.  
 Operator identity notes: [docs/hosting/session-identity.md](../docs/hosting/session-identity.md).
 
-## Tests (session identity rules)
+## Tests
 
 ```bash
 ./scripts/run-identity-tests.sh
+./scripts/run-room-character-tests.sh   # F7 story/contracts roles
 # optional: export JAVA_HOME=/path/to/jdk-21
 ```
 
