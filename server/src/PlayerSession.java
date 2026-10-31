@@ -19,6 +19,16 @@ public class PlayerSession
     public volatile boolean inParty = false;
     public volatile String joinedParty = "";
 
+    /** Last MOVE sample for combat range checks (F4). */
+    public volatile boolean hasPosition = false;
+    public volatile float posX = 0.0f;
+    public volatile float posY = 0.0f;
+    public volatile float posZ = 0.0f;
+
+    /** Authoritative normalized health 0..1 (F4). */
+    public volatile float authHealth = CombatAuthorityRules.DEFAULT_HEALTH;
+    public volatile long lastAuthHitNanos = 0L;
+
     public PlayerSession(int playerId, String username, ClientEndpoint endpoint, long lastSeen)
     {
         this.playerId = playerId;

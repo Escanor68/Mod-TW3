@@ -251,6 +251,9 @@ statemachine class r_MultiplayerClient
     private var woNpcStaleSeconds : float;
     default woNpcStaleSeconds = 5.0;
 
+    private var nextCombatHitPublishAt : float;
+    default nextCombatHitPublishAt = -999;
+
     public function WO_SetTeleporting(val : bool)
     {
         wo_isTeleporting = val;
@@ -5885,6 +5888,133 @@ statemachine class r_MultiplayerClient
         publishNpcPresence(npcKey, templatePath, target.GetWorldPosition(), rot.Yaw, target.GetHealthPercents(), "combat");
     }
 
+    public function publishCombatHit(targetUsername : string, damage : float, hitType : string)
+    {
+        var payload : string;
+
+        if(targetUsername == "" || targetUsername == username)
+        {
+            return;
+        }
+
+        if(StrContains(targetUsername, " "))
+        {
+            return;
+        }
+
+        if(hitType == "")
+        {
+            hitType = "light";
+        }
+
+        if(damage < 0.01)
+        {
+            damage = 0.08;
+        }
+
+        payload = "hit " + targetUsername + " " + damage + " " + hitType;
+        WO_Send(payload);
+    }
+
+    public function maybePublishCombatHitOnTarget()
+    {
+        var target : CActor;
+        var remote : r_RemotePlayer;
+        var now : float;
+
+        now = theGame.GetEngineTimeAsSeconds();
+
+        if(now < nextCombatHitPublishAt)
+        {
+            return;
+        }
+
+        if(!thePlayer || !thePlayer.IsInCombat())
+        {
+            return;
+        }
+
+        target = thePlayer.GetTarget();
+
+        if(!target || !target.IsAlive())
+        {
+            return;
+        }
+
+        remote = mpghosts_getPlayerFromActor(target);
+
+        if(!remote || remote.username == "" || remote.username == username)
+        {
+            return;
+        }
+
+        nextCombatHitPublishAt = now + 0.25;
+        publishCombatHit(remote.username, 0.08, "light");
+    }
+
+    function WO_ApplyHitAck()
+    {
+        theGame.r_getMultiplayerClient().applyCombatHitAck(
+            WO_Str(0),
+            WO_Float(1),
+            WO_Float(2),
+            WO_Str(3),
+            WO_Str(4));
+    }
+
+    public function applyCombatHitAck(targetUsername : string, newHealth : float, appliedDamage : float, hitType : string, attackerUsername : string)
+    {
+        var remote : r_RemotePlayer;
+        var maxVitality : float;
+
+        if(targetUsername == "")
+        {
+            return;
+        }
+
+        if(newHealth < 0.0)
+        {
+            newHealth = 0.0;
+        }
+
+        if(newHealth > 1.0)
+        {
+            newHealth = 1.0;
+        }
+
+        // Local victim: apply server-authoritative vitality.
+        if(targetUsername == username && thePlayer)
+        {
+            maxVitality = thePlayer.GetStatMax(BCS_Vitality);
+
+            if(maxVitality > 0.0)
+            {
+                thePlayer.ForceSetStat(BCS_Vitality, newHealth * maxVitality);
+            }
+
+            if(theGame.GetInGameConfigWrapper().GetVarValue('MPGhosts_Main', 'MPGhosts_DebugCombat'))
+            {
+                theGame.GetGuiManager().ShowNotification("Hit by " + attackerUsername + " hp=" + newHealth);
+            }
+        }
+
+        remote = getGlobalPlayerByUsername(targetUsername);
+
+        if(remote)
+        {
+            remote.health = newHealth;
+            remote.lastHit = theGame.GetEngineTimeAsSeconds();
+        }
+
+        remote = mpghosts_getPlayer(targetUsername);
+
+        if(remote)
+        {
+            remote.health = newHealth;
+            remote.lastHit = theGame.GetEngineTimeAsSeconds();
+        }
+    }
+
     function WO_PumpInbound(maxMessages : int)
     {
         var processed : int;
@@ -5926,6 +6056,10 @@ statemachine class r_MultiplayerClient
 
                 case 10:
                     WO_ApplyNpc();
+                    break;
+
+                case 11:
+                    WO_ApplyHitAck();
                     break;
 
                 case 6:
@@ -7905,6 +8039,7 @@ state WO_Tick in r_MultiplayerClient
             parent.updateWorldSync();
             parent.publishLocalHostileNpcTarget();
             parent.pruneRemoteNpcPresence();
+            parent.maybePublishCombatHitOnTarget();
             parent.updateLeaderDialogReadyPopup();
             MP_SU_moveMinimapPins();
 

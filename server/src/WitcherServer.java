@@ -505,7 +505,8 @@ public class WitcherServer
                 || "UPDATE2B".equals(opcode)
                 || "UPDATE3".equals(opcode)
                 || "UPDATE4".equals(opcode)
-                || "NPC".equals(opcode);
+                || "NPC".equals(opcode)
+                || "HIT".equals(opcode);
     }
 
     private static boolean isInteger(String value)
@@ -730,8 +731,16 @@ public class WitcherServer
                 return;
             }
 
+            applyPositionFromMove(current, frozenFields);
+
             int sent = broadcastChunk(socket, snapshotRecipients(), current, "MOVE", frozenFields);
             totalPacketsSent.addAndGet(sent);
+            return;
+        }
+
+        if ("HIT".equals(opcode))
+        {
+            handleHitRequest(socket, current, frozenFields);
             return;
         }
 
@@ -790,6 +799,119 @@ public class WitcherServer
             joined = "";
         }
         session.joinedParty = joined;
+    }
+
+    /**
+     * MOVE fields: sequence, x, y, z, w, heading, speed, area (min 8).
+     */
+    private static void applyPositionFromMove(PlayerSession session, List<String> fields)
+    {
+        if (session == null || fields == null || fields.size() < 4)
+        {
+            return;
+        }
+
+        try
+        {
+            session.posX = Float.parseFloat(fields.get(1).trim());
+            session.posY = Float.parseFloat(fields.get(2).trim());
+            session.posZ = Float.parseFloat(fields.get(3).trim());
+            session.hasPosition = true;
+        }
+        catch (NumberFormatException ignored)
+        {
+            // keep previous sample
+        }
+    }
+
+    /**
+     * HIT fields: targetUsername, damage, hitType
+     * Broadcast HITACK: targetUsername, newHealth, appliedDamage, hitType, attackerUsername
+     */
+    private static void handleHitRequest(DatagramSocket socket, PlayerSession attacker, List<String> fields)
+    {
+        if (attacker == null || fields == null || fields.size() < 3)
+        {
+            return;
+        }
+
+        String targetName = fields.get(0) == null ? "" : fields.get(0).trim();
+        if (targetName.isEmpty() || PartyScopeRules.normalizeName(targetName).equals(
+                PartyScopeRules.normalizeName(attacker.username)))
+        {
+            return;
+        }
+
+        PlayerSession target = players.get(PartyScopeRules.normalizeName(targetName));
+        if (target == null)
+        {
+            dbg("HIT rejected: target \"%s\" not online (from %s)\n", targetName, attacker.username);
+            return;
+        }
+
+        float requestedDamage;
+        try
+        {
+            requestedDamage = Float.parseFloat(fields.get(1).trim());
+        }
+        catch (NumberFormatException e)
+        {
+            return;
+        }
+
+        String hitType = fields.get(2) == null ? "light" : fields.get(2).trim();
+        if (hitType.isEmpty())
+        {
+            hitType = "light";
+        }
+
+        float damage = CombatAuthorityRules.clampDamage(requestedDamage);
+        if (damage <= 0.0f)
+        {
+            return;
+        }
+
+        long now = System.nanoTime();
+        if (!CombatAuthorityRules.cooldownElapsed(now, attacker.lastAuthHitNanos))
+        {
+            return;
+        }
+
+        if (!CombatAuthorityRules.withinHitRange(
+                attacker.hasPosition,
+                target.hasPosition,
+                attacker.posX,
+                attacker.posY,
+                attacker.posZ,
+                target.posX,
+                target.posY,
+                target.posZ))
+        {
+            dbg("HIT rejected: range %s -> %s\n", attacker.username, target.username);
+            return;
+        }
+
+        float newHealth = CombatAuthorityRules.applyDamage(target.authHealth, damage);
+        target.authHealth = newHealth;
+        attacker.lastAuthHitNanos = now;
+
+        List<String> ack = new ArrayList<>();
+        ack.add(target.username);
+        ack.add(Float.toString(newHealth));
+        ack.add(Float.toString(damage));
+        ack.add(hitType);
+        ack.add(attacker.username);
+
+        int sent = broadcastChunk(
+                socket,
+                snapshotRecipients(),
+                attacker,
+                "HITACK",
+                Collections.unmodifiableList(ack));
+        totalPacketsSent.addAndGet(sent);
+
+        dbg("HITACK %s -> %s dmg=%.3f hp=%.3f type=%s\n",
+                attacker.username, target.username, damage, newHealth, hitType);
     }
 
     private static void cleanupLoop()

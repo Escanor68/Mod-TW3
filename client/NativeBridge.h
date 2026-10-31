@@ -17,7 +17,8 @@ namespace wo_native
 		Kicked = 7,
 		Banned = 8,
 		NotWhitelisted = 9,
-		Npc = 10
+		Npc = 10,
+		HitAck = 11
 	};
 
 	struct InboundMessage
