@@ -1,0 +1,31 @@
+# Risk register (MMORPG path)
+
+Living log of risks for the WitcherOnline → shared-online roadmap.  
+**Fill while working. Resolve when the owning feature closes** (or explicitly accept residual risk).
+
+Status: `open` | `mitigating` | `resolved` | `accepted`
+
+| ID | Risk | Feature | Severity | Status | Mitigation / resolution |
+|----|------|---------|----------|--------|-------------------------|
+| R1 | Home host unreachable (CGNAT / no public IP) | F0 dedicated-hosting | high | mitigating | Document Tailscale + VPS; local smoke only — live peer join still operator-owned |
+| R2 | JDK mismatch: repo needs 21+, some hosts only have 8 | F0 / build | medium | mitigating | Document JDK 21+; portable JDK under `~/.local/jdk` for this machine |
+| R3 | Ban is IP-only; username spoof after IP change | F1 session-identity | medium | accepted | Documented in session-identity.md; full accounts deferred to F5 |
+| R4 | Whitelist on/off was runtime-only (lost on restart) | F1 session-identity | medium | resolved | `whitelist on/off` now persists to `server.properties` |
+| R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | Deferred to combat-authority / later auth |
+| R6 | NPC desync / no shared world | F3 npc-presence-sync | high | open | Tracked in F3; not started |
+| R7 | Client-authoritative combat / cheating | F4 combat-authority | high | open | Tracked in F4 |
+| R8 | Item duping via local saves | F5 shared-persistence | high | open | Tracked in F5 |
+| R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | open | Tracked in F6 |
+| R10 | Exposing status HTTP (40001) on public VPS | F0 ops | low | open | Runbook: enable only if locked down |
+
+## Resolution log
+
+- 2026-10-31 — **R4 resolved** during F1: whitelist flag persisted via `persistServerBoolean`.
+- 2026-10-31 — **R3 accepted** for F1: IP-only bans documented; account auth out of scope until F5.
+- _(append dated entries when marking resolved/accepted)_
+
+## How to use
+
+1. When starting a feature, add/update rows for new risks.
+2. While implementing, set status to `mitigating` and note what you did.
+3. When the feature’s acceptance is met, set owning risks to `resolved` or `accepted` and add a line under **Resolution log**.

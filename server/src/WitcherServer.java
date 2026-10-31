@@ -70,6 +70,12 @@ public class WitcherServer
         loadBannedIps();
         loadWhitelistIps();
 
+        dbg("Session identity: bans=%d whitelistEnabled=%s whitelistedIps=%d usernameHoldSec=%d\n",
+                bannedIps.size(),
+                whitelistEnabled.get(),
+                whitelistedIps.size(),
+                USERNAME_HOLD_NANOS / 1_000_000_000L);
+
         DatagramSocket socket = new DatagramSocket(port);
 
         boolean svgEnabled = readBoolean(serverProperties, "svgEnabled", false);
@@ -572,7 +578,7 @@ public class WitcherServer
             return;
         }
 
-        String usernameKey = normalizeUsernameKey(username);
+        String usernameKey = SessionIdentityRules.normalizeUsernameKey(username);
         String senderIp = normalizeIp(sender.address.getHostAddress());
         long now = System.nanoTime();
 
@@ -630,7 +636,8 @@ public class WitcherServer
         {
             UsernameReservation reservation = reservedUsernames.get(usernameKey);
 
-            if (reservation != null && now >= reservation.expiresAt)
+            if (reservation != null
+                    && !SessionIdentityRules.isReservationActive(now, reservation.expiresAt))
             {
                 reservedUsernames.remove(usernameKey, reservation);
                 reservation = null;
@@ -638,7 +645,8 @@ public class WitcherServer
 
             if (reservation != null)
             {
-                if (!reservation.ip.equals(senderIp))
+                if (!SessionIdentityRules.canClaimReservedUsername(
+                        reservation.ip, senderIp, now, reservation.expiresAt))
                 {
                     dbg("Rejected username %s from %s because it is reserved for IP %s\n",
                             username, sender, reservation.ip);
@@ -656,7 +664,8 @@ public class WitcherServer
             {
                 PlayerSession idOwner = findPlayerById(packetPlayerId);
 
-                if (idOwner != null && !normalizeUsernameKey(idOwner.username).equals(usernameKey))
+                if (idOwner != null
+                        && !SessionIdentityRules.normalizeUsernameKey(idOwner.username).equals(usernameKey))
                 {
                     dbg("Rejected username %s from %s because requested id=%d is already owned by %s\n",
                             username,
@@ -1090,23 +1099,31 @@ public class WitcherServer
             String arg = trimCommandArg(line, "whitelist");
             if (arg.isEmpty())
             {
-                dbg("Usage: whitelist on|off - enable or disable the whitelist\n");
-                dbg("Usage: whitelist <ip>|remove <ip> - add or remove IP to whitelist\n\n");
+                printWhitelistStatus();
+                dbg("Usage: whitelist on|off - enable or disable the whitelist (persisted)\n");
+                dbg("Usage: whitelist <ip>|remove <ip> - add or remove IP to whitelist\n");
+                dbg("Usage: whitelist list|status - show current whitelist\n\n");
                 return;
             }
 
             String lower = arg.toLowerCase(Locale.ROOT);
             if (lower.equals("on"))
             {
-                whitelistEnabled.set(true);
-                dbg("The whitelist is now enabled.\n\n");
+                setWhitelistEnabled(true);
+                dbg("The whitelist is now enabled (persisted to server.properties).\n\n");
                 return;
             }
 
             if (lower.equals("off"))
             {
-                whitelistEnabled.set(false);
-                dbg("The whitelist is now disabled.\n\n");
+                setWhitelistEnabled(false);
+                dbg("The whitelist is now disabled (persisted to server.properties).\n\n");
+                return;
+            }
+
+            if (lower.equals("list") || lower.equals("status"))
+            {
+                printWhitelistStatus();
                 return;
             }
 
@@ -1146,8 +1163,20 @@ public class WitcherServer
             }
             else
             {
-                dbg("IP '%s' is already in whitelist.\n\n");
+                dbg("IP '%s' is already in whitelist.\n\n", ip);
             }
+            return;
+        }
+
+        if (line.equals("bans") || line.equals("banlist"))
+        {
+            printBanList();
+            return;
+        }
+
+        if (line.equals("reserved"))
+        {
+            printReservedUsernames();
             return;
         }
 
@@ -1164,8 +1193,11 @@ public class WitcherServer
             dbg("kick <name|ip>            - remove a player and send a kick notice\n");
             dbg("ban <name|ip>             - ban by name/ip and prevent future updates\n");
             dbg("unban <ip>                - remove IP from ban list\n");
+            dbg("bans                      - list banned IPs\n");
             dbg("whitelist on|off|<ip>     - toggle whitelist or add IP to whitelist\n");
             dbg("whitelist remove <ip>     - remove IP from whitelist\n");
+            dbg("whitelist list|status     - show whitelist flag and IPs\n");
+            dbg("reserved                  - list username holds after timeout\n");
             dbg("list                      - list connected players\n");
             dbg("stats                     - show broadcast/server health counters\n");
             dbg("about                     - info about Witcher Online\n");
@@ -1189,7 +1221,7 @@ public class WitcherServer
 
     private static void kickPlayer(DatagramSocket socket, PlayerSession victim, String kickText)
     {
-        String usernameKey = normalizeUsernameKey(victim.username);
+        String usernameKey = SessionIdentityRules.normalizeUsernameKey(victim.username);
 
         PlayerSession removed = players.remove(usernameKey);
         reservedUsernames.remove(usernameKey);
@@ -1221,7 +1253,7 @@ public class WitcherServer
 
     private static PlayerSession findPlayer(String arg)
     {
-        PlayerSession exact = players.get(normalizeUsernameKey(arg));
+        PlayerSession exact = players.get(SessionIdentityRules.normalizeUsernameKey(arg));
         if (exact != null)
         {
             return exact;
@@ -1751,9 +1783,94 @@ public class WitcherServer
         return out;
     }
 
-    private static String normalizeUsernameKey(String username)
+    private static void setWhitelistEnabled(boolean enabled)
     {
-        return username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
+        whitelistEnabled.set(enabled);
+        persistServerBoolean("whitelist", enabled);
+    }
+
+    private static void persistServerBoolean(String key, boolean value)
+    {
+        Path path = serverPropertiesPath();
+        Properties properties = loadServerProperties();
+        properties.setProperty(key, value ? "true" : "false");
+
+        try
+        {
+            Path parent = path.getParent();
+            if (parent != null)
+            {
+                Files.createDirectories(parent);
+            }
+
+            try (var writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8))
+            {
+                properties.store(writer, "Witcher Online server.properties");
+            }
+
+            dbg("Wrote %s=%s to %s\n", key, value, path);
+        }
+        catch (IOException e)
+        {
+            dbg("Failed to persist %s to %s: %s\n", key, path, e.getMessage());
+        }
+    }
+
+    private static void printBanList()
+    {
+        dbg("---- Banned IPs (%d) ----\n", bannedIps.size());
+        if (bannedIps.isEmpty())
+        {
+            dbg("(empty)\n\n");
+            return;
+        }
+
+        List<String> sorted = new ArrayList<>(bannedIps);
+        Collections.sort(sorted);
+        for (String ip : sorted)
+        {
+            dbg("%s\n", ip);
+        }
+        dbgNotime("\n");
+    }
+
+    private static void printWhitelistStatus()
+    {
+        dbg("---- Whitelist ----\n");
+        dbg("enabled=%s\n", whitelistEnabled.get());
+        dbg("ips=%d\n", whitelistedIps.size());
+        if (!whitelistedIps.isEmpty())
+        {
+            List<String> sorted = new ArrayList<>(whitelistedIps);
+            Collections.sort(sorted);
+            for (String ip : sorted)
+            {
+                dbg("%s\n", ip);
+            }
+        }
+        dbgNotime("\n");
+    }
+
+    private static void printReservedUsernames()
+    {
+        long now = System.nanoTime();
+        dbg("---- Reserved usernames (%d) ----\n", reservedUsernames.size());
+        if (reservedUsernames.isEmpty())
+        {
+            dbg("(empty)\n\n");
+            return;
+        }
+
+        for (UsernameReservation reservation : reservedUsernames.values())
+        {
+            long remainingMs = Math.max(0L, (reservation.expiresAt - now) / 1_000_000L);
+            dbg("name=\"%s\" ip=%s remainingMs=%d active=%s\n",
+                    reservation.username,
+                    reservation.ip,
+                    remainingMs,
+                    SessionIdentityRules.isReservationActive(now, reservation.expiresAt));
+        }
+        dbgNotime("\n");
     }
 
     private static boolean reserveTimedOutPlayer(String usernameKey, PlayerSession session, long now)

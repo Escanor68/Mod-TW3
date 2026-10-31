@@ -19,7 +19,15 @@ java -jar out/WitcherServer.jar
 # or: java -jar out/WitcherServer.jar 40000
 ```
 
-Console: type `help` or `?` for kick/ban/whitelist/stats commands.
+Console: type `help` or `?` for kick/ban/whitelist/stats commands.  
+Operator identity notes: [docs/hosting/session-identity.md](../docs/hosting/session-identity.md).
+
+## Tests (session identity rules)
+
+```bash
+./scripts/run-identity-tests.sh
+# optional: export JAVA_HOME=/path/to/jdk-21
+```
 
 ## Hosting outside your LAN
 

@@ -400,3 +400,7 @@ bin/
 .idea/
 # Local AI runtime state
 .atl/
+
+# Server build outputs
+server/out/
+server/out-test/

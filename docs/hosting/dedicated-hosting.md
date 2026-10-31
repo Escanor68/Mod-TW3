@@ -75,6 +75,12 @@ Local automation helper (bind + config shape only): `docs/hosting/smoke-local.sh
 
 Requires **JDK 21+** (source uses APIs newer than Java 8). See `server/README.md`.
 
+## Session identity / moderation
+
+Bans, whitelist, kicks, username holds: [session-identity.md](session-identity.md).
+
 ## Out of scope (later ODD features)
 
 NPC sync, combat authority, shared persistence, sharding — see `odd/tasks/`.
+
+Program risks: [odd/risks.md](../../odd/risks.md).
