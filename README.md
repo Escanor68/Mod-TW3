@@ -11,13 +11,6 @@
 
 This repository (`main`) carries the WitcherOnline line plus an **MMORPG-path** slice (hosting, identity, party world, NPC presence, combat authority, shared persistence, interest management). Tracking: `odd/tasks/`, risks: `odd/risks.md`.
 
-## Quick path
-
-1. Playable build: [Nexus — Witcher Online](https://www.nexusmods.com/witcher3/mods/11590).
-2. Docs / wiki: [Witcher Online Wiki](https://rejuvenate.gitbook.io/witcheronline).
-3. Host friends outside your LAN: [docs/hosting/dedicated-hosting.md](docs/hosting/dedicated-hosting.md) (Tailscale or VPS).
-4. Build the Java server from source: [server/README.md](server/README.md) (**JDK 21+**).
-
 ## Game version (Next Gen)
 
 **Target:** *The Witcher 3: Wild Hunt* **Next Gen v4.04+** (Steam / GOG / Epic). Upstream does **not** support Classic or builds older than v4.04 (REDkit June 2024).
