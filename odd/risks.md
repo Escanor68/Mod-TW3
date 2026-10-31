@@ -21,6 +21,14 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R12 | In-game dual-client proof unavailable in this environment | F2 / F0 | medium | accepted | Manual checklists; operator runs acceptance on TW3 clients |
 | R13 | Publishing WitcherOnline work into Mod-TW3 must not wipe existing Witcher3-MP `main` | delivery | high | accepted | User authorized force-replace of `main` with WitcherOnline line (`ddf2cae`); prior Witcher3-MP `main` overwritten |
 | R14 | Story breaks if non-Geralt drives dialog / no room owner | F7 story-room-characters | high | mitigated | Server enforces Geralt owner + STORYDONE gate + leave transfer; level still client-reported (spoof residual) |
+| R15 | Persistence load fail → empty map → flush wipes store; non-atomic write | F8 harden-base | high | open | Atomic temp+rename; fail-closed load; tracked in F8 |
+| R16 | HIT/interest fail-open without MOVE positions | F8 / F11 | high | open | Fail-closed without positions (F8); combat harden F11 |
+| R17 | Party membership + characterLevel client-declared (spoof interest / Geralt seat) | F9 / F7 | high | open | Authoritative party (F9); level ops later |
+| R18 | Economy via client INVSAVE snapshot (dupe residual) | F10 economy-operations | high | open | Server ops + idempotency; revise R8 when F10 lands |
+| R19 | Shared authToken ≠ identity; no session generation / replay window | F12 session-hardening | high | open | sessionId + invalidate old endpoint; revise R5 honesty |
+| R20 | Client socket race, no reconnect, remotePlayers leak, AUTH UX wrong | F13 client-resilience | medium | open | Strand/reconnect/evict/error map |
+| R21 | HITACK global flood; client-declared damage magnitude | F11 combat-hardening | high | open | Interest-scoped HITACK; server damage table |
+| R22 | QA session `config.xml.bak` may leak AuthToken | F8 harden-base | medium | open | Redact bak in tools/qa-session |
 
 ## Resolution log
 
@@ -42,6 +50,8 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R8 accepted**: F5 crowns/key-bag slice closed; full inventory/quest graph remains local residual.
 - 2026-10-31 — **R5 resolved**: optional shared-secret AUTH gate; residual empty-token LAN mode is operator choice.
 - 2026-10-31 — **R14 open**: F7 story-room-characters ODD added (Geralt room owner + species support).
+- 2026-10-31 — **R14 mitigated**: F7 implemented; residual level spoof / dual-client.
+- 2026-10-31 — **R15–R22 open**: backlog ODDs F8–F17 from technical audits (see `odd/roadmap.md`).
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use

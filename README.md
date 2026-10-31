@@ -9,7 +9,7 @@
 
 **Witcher Online** is a mod that adds multiplayer to *The Witcher 3: Wild Hunt*. Join servers with friends, customize characters with [Custom Player Characters](https://www.nexusmods.com/witcher3/mods/5940), relax with [Chill Out](https://www.nexusmods.com/witcher3/mods/6402), play Gwent, party up, chat, and emote.
 
-This repository (`main`) carries the WitcherOnline line plus an **MMORPG-path** slice (hosting, identity, party world, NPC presence, combat authority, shared persistence, interest management). Tracking: `odd/tasks/`, risks: `odd/risks.md`.
+This repository (`main`) carries the WitcherOnline line plus an **MMORPG-path** slice (hosting, identity, party world, NPC presence, combat authority, shared persistence, interest management, story-room characters). Tracking: [`odd/roadmap.md`](odd/roadmap.md), tasks: `odd/tasks/`, risks: [`odd/risks.md`](odd/risks.md).
 
 ## Game version (Next Gen)
 
@@ -105,8 +105,9 @@ Operator / developer notes under `docs/hosting/`:
 | Crowns + key-item bag persistence | [shared-persistence.md](docs/hosting/shared-persistence.md) |
 | Proximity interest broadcasts | [world-instances.md](docs/hosting/world-instances.md) |
 | Story room characters (story Geralt owner; post-story free pick) | [story-room-characters.md](docs/hosting/story-room-characters.md) — F7 ROLECLAIM / STORYDONE |
+| **Planned** F8–F17 (harden, party auth, economy ops, combat/session/client, matrix, contract pilot, metrics, scale) | [odd/roadmap.md](odd/roadmap.md) — tracking only until implemented |
 
-**Still local / residual:** full quest graph, full inventory, and deep NPC AI are not fully server-owned. Dual-client in-game checklists are operator-run (`odd/risks.md`).
+**Still local / residual:** full quest graph, full inventory, and deep NPC AI are not fully server-owned. Dual-client in-game checklists are operator-run (`odd/risks.md`). Next implement: **F8 harden-base**.
 
 Public hosts should set `authToken` in `server.properties` and matching `<AuthToken>` in client `config.xml`.
 
