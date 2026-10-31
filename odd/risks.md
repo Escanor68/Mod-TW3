@@ -12,7 +12,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R3 | Ban is IP-only; username spoof after IP change | F1 session-identity | medium | accepted | Documented in session-identity.md; full accounts deferred to F5 |
 | R4 | Whitelist on/off was runtime-only (lost on restart) | F1 session-identity | medium | resolved | `whitelist on/off` now persists to `server.properties` |
 | R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | F4 clamps HIT damage/range/cooldown; full packet auth still deferred |
-| R6 | NPC desync / no shared world | F3 npc-presence-sync | high | mitigating | Party NPC ghosts spawn; first slice uses shared geralt_npc visual; T5 in-game open |
+| R6 | NPC desync / no shared world | F3 npc-presence-sync | high | accepted | Party NPC ghosts shipped; residual shared visual + operator T5 checklist accepted for F3 slice |
 | R7 | Client-authoritative combat / cheating | F4 combat-authority | high | mitigating | Server `authHealth` + HIT/HITACK; local animations can still play; dual-client T4 open |
 | R8 | Item duping via local saves | F5 shared-persistence | high | mitigating | Crowns+key-bag server snapshot; covered qty overwrite; full inventory still local |
 | R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | resolved | Interest radius 100u + party exception; heartbeat logs interest vs baseline (`092924f`) |
@@ -36,6 +36,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R10 resolved**: status HTTP defaults to loopback bind (`svgBind`).
 - 2026-10-31 — **R2 resolved**: `require-jdk21.sh` fail-fast on JDK &lt; 21 for all `run-*-tests.sh`.
 - 2026-10-31 — **R1 accepted**: CGNAT/public reachability is an operator path (Tailscale/VPS); residual accepted for F0.
+- 2026-10-31 — **R6 accepted**: F3 party NPC slice closed; residual shared geralt_npc visual + in-game T5 accepted.
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use

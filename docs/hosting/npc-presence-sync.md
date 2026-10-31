@@ -41,3 +41,7 @@ Stale entries prune after ~5s; `state=despawn` removes immediately. Cap: 24 remo
 - [ ] A alone → no self-echo / no broadcast
 - [ ] Leave party / hide ghosts → remote NPC entities cleared
 - [ ] Optional: `MPGhosts_DebugNpc` shows spawn toasts
+
+## Residual risk (R6)
+
+First slice uses a shared `geralt_npc` visual and party-only relay. Full AI/quest NPC authority is out of scope; residual **accepted** for F3.
