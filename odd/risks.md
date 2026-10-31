@@ -20,7 +20,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R11 | Party time/weather failed when leader ghost not spawned | F2 party-world-slice | medium | resolved | Store UPDATE4 world fields on global player; fallback in `updateWorldSync` |
 | R12 | In-game dual-client proof unavailable in this environment | F2 / F0 | medium | accepted | Manual checklists; operator runs acceptance on TW3 clients |
 | R13 | Publishing WitcherOnline work into Mod-TW3 must not wipe existing Witcher3-MP `main` | delivery | high | accepted | User authorized force-replace of `main` with WitcherOnline line (`ddf2cae`); prior Witcher3-MP `main` overwritten |
-| R14 | Story breaks if non-Geralt drives dialog / no room owner | F7 story-room-characters | high | open | Tracked in F7: enforce single Geralt owner per room; support species cannot own story seat |
+| R14 | Story breaks if non-Geralt drives dialog / no room owner | F7 story-room-characters | high | open | F7: Geralt owner in story mode; contracts/explore mode allows free pick — must not spoof mode to bypass owner |
 
 ## Resolution log
 

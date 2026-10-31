@@ -2,19 +2,26 @@
 
 **Status:** ODD tracking only (`odd/tasks/story-room-characters.md`). Not implemented yet.
 
+## Modes
+
+| Mode | When | Characters | Story seat |
+|------|------|------------|------------|
+| **Story** | Main playthrough still active | Owner = **Geralt**; others = **humano / elfo / brujo / hechicera** (support, species qualities) | Geralt owner required |
+| **Contracts / explore** | Main story finished; contracts remain | **Free pick** (e.g. Eredin, Emhyr, any CPC) | No Geralt-owner requirement |
+
 ## Intent
 
-- One **Geralt** = **room owner** so the main story can continue (dialog / quest seat).
-- Others build a character as **humano / elfo / brujo / hechicera** with species-appropriate qualities, as **support**.
+- Keep the main story coherent: one Geralt drives dialog/quest continuity; supports assist.
+- After the story, unlock free casting for exploring and doing witcher contracts together.
 
 ## Working assumptions (pending T1)
 
 | Topic | Assumption |
 |-------|------------|
 | Room | Existing party/session on the dedicated server (F2 social unit) |
-| Owner | CPC Geralt; sole story authority for the room |
-| Support | Non-owner species kits; cannot claim owner while another Geralt holds the seat |
-| Owner leave | TBD in T1: transfer to another Geralt, or freeze story until a Geralt reclaims |
+| Mode flag | Explicit `story` \| `contracts` (host sets, or later auto-detect) |
+| Story owner leave | TBD: transfer to another Geralt, or freeze until reclaim |
+| Free pick catalog | CPC / Custom Player Characters appearances (not unlimited custom meshes) |
 
 ## Related
 
