@@ -24,8 +24,6 @@ This repository (`main`) carries the WitcherOnline line plus an **MMORPG-path** 
 | Server (Java) | Game-version agnostic; still **JDK 21+** |
 | In-game dual-client proof | Not run in this environment — verify on your 4.04+ install |
 
-Nexus may omit a “Remastered Compatible” store tag; that does not override the wiki/Nexus description requiring Next Gen 4.04+.
-
 ## Features / Playguide
 
 Full movement, combat, and appearance sync. Emotes and chat via player menu or console. Morphs, horses, boats, Gwent (Timed/Normal + bets), parties (time / weather / dialog).
