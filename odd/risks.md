@@ -11,9 +11,9 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R2 | JDK mismatch: repo needs 21+, some hosts only have 8 | F0 / build | medium | mitigating | Document JDK 21+; portable JDK under `~/.local/jdk` for this machine |
 | R3 | Ban is IP-only; username spoof after IP change | F1 session-identity | medium | accepted | Documented in session-identity.md; full accounts deferred to F5 |
 | R4 | Whitelist on/off was runtime-only (lost on restart) | F1 session-identity | medium | resolved | `whitelist on/off` now persists to `server.properties` |
-| R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | Deferred to combat-authority / later auth |
+| R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | F4 clamps HIT damage/range/cooldown; full packet auth still deferred |
 | R6 | NPC desync / no shared world | F3 npc-presence-sync | high | mitigating | Party NPC ghosts spawn; first slice uses shared geralt_npc visual; T5 in-game open |
-| R7 | Client-authoritative combat / cheating | F4 combat-authority | high | open | Tracked in F4 |
+| R7 | Client-authoritative combat / cheating | F4 combat-authority | high | mitigating | Server `authHealth` + HIT/HITACK; local animations can still play; dual-client T4 open |
 | R8 | Item duping via local saves | F5 shared-persistence | high | open | Tracked in F5 |
 | R9 | Broadcast cost grows O(n²) with players | F6 world-instances | medium | open | Tracked in F6 |
 | R10 | Exposing status HTTP (40001) on public VPS | F0 ops | low | open | Runbook: enable only if locked down |
@@ -29,6 +29,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R12 accepted** for F0/F2: no TW3 dual-client in CI/dev host; checklists only.
 - 2026-10-31 — **R13 resolved**: remote `mod-tw3` → branch `witcheronline-mmorpg` (https://github.com/Escanor68/Mod-TW3/tree/witcheronline-mmorpg).
 - 2026-10-31 — **R13 accepted (superseded)**: user asked to wipe prior `main` and force-push WitcherOnline (`ddf2cae`) to https://github.com/Escanor68/Mod-TW3/tree/main.
+- 2026-10-31 — **R7 mitigating** during F4: HIT/HITACK + `CombatAuthorityRules`; residual local anim + UDP forge (R5).
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use

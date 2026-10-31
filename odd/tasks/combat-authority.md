@@ -1,6 +1,6 @@
 # combat-authority (F4)
 
-Objective: Move combat resolution toward server-validated outcomes to reduce desync and trivial client-side cheating — required before credible MMO PvE/PvP. Branch: `feat/combat-authority`. Delivery: `ask-on-risk`. Runner: dual-client combat scenarios; optional Java unit tests for validation rules if extracted.
+Objective: Move combat resolution toward server-validated outcomes to reduce desync and trivial client-side cheating — required before credible MMO PvE/PvP. Branch: `feat/combat-authority`. Delivery: `ask-on-risk`. Runner: `server/scripts/run-combat-authority-tests.sh` + dual-client combat checklist.
 
 ## Specs
 
@@ -14,12 +14,19 @@ Acceptance: forged/local-only damage does not stick for covered cases; both clie
 
 ## Tasks
 
-- [ ] T1 (S2, S4) — Inventory current combat-related packets/scripts — route: inline — status: pending — commit: —
-- [ ] T2 (S2, S3) — Define validation rules for slice — route: inline — status: pending — commit: —
-- [ ] T3 (S3, S4) — Server validation + client apply path — route: inline — status: pending — commit: —
-- [ ] T4 (S3) — Abuse + happy-path verification — route: inline — status: pending — commit: —
+- [x] T1 (S2, S4) — Inventory current combat-related packets/scripts — route: inline — status: done — commit: —
+  - Pre-F4: no HIT path; combat was local. Surface: MOVE positions + UPDATE* + F3 NPC. New opcodes: `HIT` / `HITACK`, script poll `11`.
+- [x] T2 (S2, S3) — Define validation rules for slice — route: inline — status: done — commit: —
+  - `CombatAuthorityRules`: clamp 0.01–0.35, 200ms cooldown, 8u range, HP 0..1.
+- [x] T3 (S3, S4) — Server validation + client apply path — route: inline — status: done — commit: —
+  - Server `handleHitRequest`; DLL `hit`/`HITACK`; script publish + `applyCombatHitAck`.
+- [ ] T4 (S3) — Abuse + happy-path verification — route: inline — status: partial — commit: —
+  - Unit tests: `run-combat-authority-tests.sh`. Dual-client checklist in `docs/hosting/combat-authority.md` (operator-owned, same as F3 T5).
 
 ## Log
 
 - L1: "primero arrancamos con crear los ODD y despues vamos con lo demas"
 - L2: 2026-10-31 — Feature doc created from roadmap F4. Implementation not authorized yet; tracking only.
+- L3: 2026-10-31 — User: "despues lo pruebo, seguimos con F4" (defer F3 T5; authorize F4).
+- L4: 2026-10-31 — Implemented PvP HIT→HITACK authority slice + docs + unit tests. In-game duel proof deferred (R12).
+- L5: Risk: item 2 (anti-cheat surface for covered hits); item 3 (HIT/HITACK contract); item 4 (session HP/cooldown concurrency). Item 6: Java unit tests; dual-client T4 still open.

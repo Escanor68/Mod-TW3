@@ -20,7 +20,8 @@ Acceptance: two party clients see a remote NPC ghost for the publisher’s comba
 - [x] T3 (S3, S4) — Protocol + server relay for NPC presence slice — route: inline — status: done — commit: 7c92f59
 - [x] T4 (S3) — Client/script apply remote NPC presence — route: inline — status: done — commit: 833939a
   - Spawn/teleport/despawn ghosts + auto-publish local hostile target while in party.
-- [ ] T5 (S3) — Dual-client verification evidence — route: inline — status: pending — commit: —
+- [ ] T5 (S3) — Dual-client verification evidence — route: inline — status: deferred — commit: —
+  - User: will test in-game later ("despues lo pruebo"); continue F4.
 
 ## Log
 
@@ -31,3 +32,4 @@ Acceptance: two party clients see a remote NPC ghost for the publisher’s comba
 - L5: 2026-10-31 — Recommended party-only; user: "perfecto". Implemented NPC opcode + party filter + client/script scaffold.
 - L6: Risk: item 3 (new NPC protocol contract); item 4 (party recipient selection). Item 6: PartyScopeRules tests; T5 in-game still open.
 - L7: 2026-10-31 — User: "seguimos con spawn de entidades". Implemented remoteNpc ghost spawn + local target publish.
+- L8: 2026-10-31 — User: "despues lo pruebo, seguimos con F4". T5 remains deferred; work continues on combat-authority.
