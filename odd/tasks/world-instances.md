@@ -14,13 +14,13 @@ Acceptance: N clients stay playable with bounded broadcast cost vs baseline; par
 
 ## Tasks
 
-- [x] T1 (S2, S3) — Blocking decision: interest mgmt vs region instances — route: inline — status: done — commit: —
+- [x] T1 (S2, S3) — Blocking decision: interest mgmt vs region instances — route: inline — status: done — commit: 092924f
   - User confirmed interest management ("si").
-- [x] T2 (S2, S4) — Design + implement chosen slice — route: inline — status: done — commit: —
+- [x] T2 (S2, S4) — Design + implement chosen slice — route: inline — status: done — commit: 092924f
   - `InterestManagementRules` + `snapshotInterestRecipients` on MOVE/UPDATE*/HITACK.
-- [x] T3 (S3, S5) — Regression with party + NPC presence — route: inline — status: done — commit: —
+- [x] T3 (S3, S5) — Regression with party + NPC presence — route: inline — status: done — commit: 092924f
   - Party always relays; NPC stays party-only (unchanged).
-- [ ] T4 (S1) — Load smoke + stats evidence — route: inline — status: partial — commit: —
+- [ ] T4 (S1) — Load smoke + stats evidence — route: inline — status: partial — commit: 092924f (unit); load smoke open
   - Unit tests + heartbeat fields; dual-client load smoke operator-owned (R12).
 
 ## Log
