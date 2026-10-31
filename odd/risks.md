@@ -19,7 +19,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R10 | Exposing status HTTP (40001) on public VPS | F0 ops | low | open | Runbook: enable only if locked down |
 | R11 | Party time/weather failed when leader ghost not spawned | F2 party-world-slice | medium | resolved | Store UPDATE4 world fields on global player; fallback in `updateWorldSync` |
 | R12 | In-game dual-client proof unavailable in this environment | F2 / F0 | medium | accepted | Manual checklists; operator runs acceptance on TW3 clients |
-| R13 | Publishing WitcherOnline work into Mod-TW3 must not wipe existing Witcher3-MP `main` | delivery | high | resolved | Pushed `witcheronline-mmorpg` to Escanor68/Mod-TW3; `main` untouched |
+| R13 | Publishing WitcherOnline work into Mod-TW3 must not wipe existing Witcher3-MP `main` | delivery | high | accepted | User authorized force-replace of `main` with WitcherOnline line (`ddf2cae`); prior Witcher3-MP `main` overwritten |
 
 ## Resolution log
 
@@ -28,6 +28,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R11 resolved** during F2: global-player world fields + sync fallback.
 - 2026-10-31 — **R12 accepted** for F0/F2: no TW3 dual-client in CI/dev host; checklists only.
 - 2026-10-31 — **R13 resolved**: remote `mod-tw3` → branch `witcheronline-mmorpg` (https://github.com/Escanor68/Mod-TW3/tree/witcheronline-mmorpg).
+- 2026-10-31 — **R13 accepted (superseded)**: user asked to wipe prior `main` and force-push WitcherOnline (`ddf2cae`) to https://github.com/Escanor68/Mod-TW3/tree/main.
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use
