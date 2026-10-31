@@ -31,10 +31,10 @@ Acceptance (when implemented):
 ## Tasks
 
 - [x] T1 (S9, S10, S8) — Product refine: mode = only on “historia terminada”; leave = highest-level Geralt transfer — route: inline — status: done — commit: 098e4d2
-- [x] T2 (S2, S12) — Story-mode species matrix vs CPC types — route: inline — status: done — commit: c7e7968
-- [x] T3 (S3, S4, S6, S8, S10, S14, S16, S17) — Protocol + server: “historia terminada”→contracts, Geralt owner, leave transfer, free-pick — route: inline — status: done — commit: c7e7968
-- [x] T4 (S3, S6, S8, S13, S16, S17) — Client/script: mode gates + Geralt handoff + contract play in both modes — route: inline — status: done — commit: c7e7968
-- [x] T5 (S1, S5, S7, S9, S15) — Unit tests for rules; dual-client checklist operator-owned — route: inline — status: done (unit) / pending (dual-client) — commit: c7e7968
+- [x] T2 (S2, S12) — Story-mode species matrix vs CPC types — route: inline — status: done — commit: 0181ba1
+- [x] T3 (S3, S4, S6, S8, S10, S14, S16, S17) — Protocol + server: “historia terminada”→contracts, Geralt owner, leave transfer, free-pick — route: inline — status: done — commit: 0181ba1
+- [x] T4 (S3, S6, S8, S13, S16, S17) — Client/script: mode gates + Geralt handoff + contract play in both modes — route: inline — status: done — commit: 0181ba1
+- [x] T5 (S1, S5, S7, S9, S15) — Unit tests for rules; dual-client checklist operator-owned — route: inline — status: done (unit) / pending (dual-client) — commit: 0181ba1
 
 ## Log
 
