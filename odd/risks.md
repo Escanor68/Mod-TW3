@@ -11,7 +11,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 | R2 | JDK mismatch: repo needs 21+, some hosts only have 8 | F0 / build | medium | resolved | Shared `require-jdk21.sh` gates all server test scripts; docs call out JDK 21+ |
 | R3 | Ban is IP-only; username spoof after IP change | F1 session-identity | medium | accepted | Documented in session-identity.md; full accounts deferred to F5 |
 | R4 | Whitelist on/off was runtime-only (lost on restart) | F1 session-identity | medium | resolved | `whitelist on/off` now persists to `server.properties` |
-| R5 | UDP protocol forgeable (no auth) | F1→F4 | high | open | F4 clamps HIT damage/range/cooldown; full packet auth still deferred |
+| R5 | UDP protocol forgeable (no auth) | F1→F4 | high | resolved | Optional `authToken` + client `AUTH`; empty token still open for LAN — operators must set token on public hosts |
 | R6 | NPC desync / no shared world | F3 npc-presence-sync | high | accepted | Party NPC ghosts shipped; residual shared visual + operator T5 checklist accepted for F3 slice |
 | R7 | Client-authoritative combat / cheating | F4 combat-authority | high | accepted | HIT/HITACK authHealth shipped; residual local anim + UDP forge (see R5) accepted for F4 slice |
 | R8 | Item duping via local saves | F5 shared-persistence | high | accepted | Crowns+key-bag server wins shipped; residual uncovered inventory stays local — accepted for F5 slice |
@@ -39,6 +39,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R6 accepted**: F3 party NPC slice closed; residual shared geralt_npc visual + in-game T5 accepted.
 - 2026-10-31 — **R7 accepted**: F4 PvP HIT slice closed; residual local animations and packet forge deferred to R5/ops.
 - 2026-10-31 — **R8 accepted**: F5 crowns/key-bag slice closed; full inventory/quest graph remains local residual.
+- 2026-10-31 — **R5 resolved**: optional shared-secret AUTH gate; residual empty-token LAN mode is operator choice.
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use

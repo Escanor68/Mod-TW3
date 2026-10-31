@@ -63,12 +63,14 @@ public class WitcherServer
     private static final AtomicInteger nextPlayerId = new AtomicInteger(1);
 
     private static volatile SharedPersistenceStore persistenceStore = null;
+    private static volatile String requiredAuthToken = "";
 
     public static void main(String[] args) throws Exception
     {
         Properties serverProperties = loadServerProperties();
         int port = choosePort(args, serverProperties);
         whitelistEnabled.set(readBoolean(serverProperties, "whitelist", false));
+        requiredAuthToken = readString(serverProperties, "authToken", "").trim();
 
         loadBannedIps();
         loadWhitelistIps();
@@ -83,6 +85,7 @@ public class WitcherServer
         dbg("Shared persistence: snapshots=%d path=%s\n",
                 persistenceStore.size(),
                 playerSnapshotsPath());
+        dbg("Packet auth: required=%s\n", PacketAuthRules.isRequired(requiredAuthToken));
 
         DatagramSocket socket = new DatagramSocket(port);
 
@@ -531,7 +534,8 @@ public class WitcherServer
                 || "NPC".equals(opcode)
                 || "HIT".equals(opcode)
                 || "INVSAVE".equals(opcode)
-                || "INVLOADREQ".equals(opcode);
+                || "INVLOADREQ".equals(opcode)
+                || "AUTH".equals(opcode);
     }
 
     private static boolean isInteger(String value)
@@ -713,12 +717,14 @@ public class WitcherServer
             }
 
             PlayerSession created = new PlayerSession(playerIdToUse, username, sender, now);
+            created.authenticated = !PacketAuthRules.isRequired(requiredAuthToken);
             PlayerSession race = players.putIfAbsent(usernameKey, created);
 
             if (race == null)
             {
                 current = created;
-                dbg("Accepted username %s id=%d for %s\n", username, created.playerId, sender);
+                dbg("Accepted username %s id=%d for %s auth=%s\n",
+                        username, created.playerId, sender, created.authenticated);
             }
             else
             {
@@ -748,6 +754,18 @@ public class WitcherServer
         }
 
         List<String> frozenFields = Collections.unmodifiableList(fields);
+
+        if ("AUTH".equals(opcode))
+        {
+            handleAuth(socket, current, frozenFields);
+            return;
+        }
+
+        if (PacketAuthRules.isRequired(requiredAuthToken) && !current.authenticated)
+        {
+            safeSend(socket, sender, "ERROR\tAUTH_REQUIRED");
+            return;
+        }
 
         if ("MOVE".equals(opcode))
         {
@@ -956,6 +974,38 @@ public class WitcherServer
 
         dbg("HITACK %s -> %s dmg=%.3f hp=%.3f type=%s\n",
                 attacker.username, target.username, damage, newHealth, hitType);
+    }
+
+    /**
+     * AUTH fields: token. Required when {@code authToken} is set in server.properties (R5).
+     */
+    private static void handleAuth(DatagramSocket socket, PlayerSession session, List<String> fields)
+    {
+        if (session == null)
+        {
+            return;
+        }
+
+        if (!PacketAuthRules.isRequired(requiredAuthToken))
+        {
+            session.authenticated = true;
+            return;
+        }
+
+        String provided = (fields == null || fields.isEmpty() || fields.get(0) == null)
+                ? ""
+                : fields.get(0).trim();
+
+        if (!PacketAuthRules.matches(requiredAuthToken, provided))
+        {
+            session.authenticated = false;
+            safeSend(socket, session.endpoint, "ERROR\tAUTH_FAILED");
+            dbg("AUTH failed for %s\n", session.username);
+            return;
+        }
+
+        session.authenticated = true;
+        dbg("AUTH ok for %s\n", session.username);
     }
 
     /**

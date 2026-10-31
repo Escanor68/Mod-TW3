@@ -51,6 +51,12 @@ Errors clients may see: `ERROR BANNED`, `ERROR NOT_WHITELISTED`, `ERROR USERNAME
 
 Automated (rules only): `server/scripts/run-identity-tests.sh`.
 
+## Optional packet auth (R5)
+
+Set `authToken=...` in `server.properties`. Clients add matching `<AuthToken>` in `config.xml`.  
+DLL sends `AUTH` on connect; server replies `ERROR AUTH_REQUIRED` / `AUTH_FAILED` if missing/wrong.  
+Empty `authToken` keeps LAN/dev open (no AUTH required).
+
 ## Related
 
 - Reachability: [dedicated-hosting.md](dedicated-hosting.md)

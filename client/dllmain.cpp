@@ -25,6 +25,7 @@ namespace fs = std::filesystem;
 static std::string username = "Player";
 static std::string ip = "46.62.255.79";
 static std::string port = "40000";
+static std::string authToken = "";
 static HANDLE g_initThread = NULL;
 static std::atomic<int> g_localPlayerId{0};
 static std::atomic<bool> g_shutdown{false};
@@ -676,6 +677,26 @@ static void ProcessInvLoadReq(const std::string &payload)
 	(void)payload;
 }
 
+static void SendAuthIfConfigured()
+{
+	if (authToken.empty())
+		return;
+
+	std::vector<std::string> fields;
+	fields.push_back(authToken);
+	SendUdpPacket(BuildPacket("AUTH", BuildLocalPacketId(), fields), "AUTH");
+}
+
+static void ProcessAuth(const std::string &payload)
+{
+	// Script: "auth <token>"
+	std::vector<std::string> fields = SplitSpacesAfterTag(payload);
+	if (fields.empty())
+		return;
+
+	SendUdpPacket(BuildPacket("AUTH", BuildLocalPacketId(), fields), "AUTH");
+}
+
 static void ProcessOutbound(const std::string &payload)
 {
 	const std::string tag = PayloadTag(payload);
@@ -688,7 +709,7 @@ static void ProcessOutbound(const std::string &payload)
 
 	const bool scriptTransportPayload = tag == "move" || tag == "wo" || tag == "wo2" || tag == "wo3" || tag == "wo4"
 		|| tag == "presence" || tag == "presence_transition" || tag == "npc" || tag == "hit"
-		|| tag == "invsave" || tag == "invloadreq";
+		|| tag == "invsave" || tag == "invloadreq" || tag == "auth";
 
 	if (!scriptTransportPayload)
 		return;
@@ -719,6 +740,8 @@ static void ProcessOutbound(const std::string &payload)
 		ProcessInvSave(payload);
 	else if (tag == "invloadreq")
 		ProcessInvLoadReq(payload);
+	else if (tag == "auth")
+		ProcessAuth(payload);
 }
 
 static void QueueMovement(int playerId, const std::string &playerUsername, const std::vector<std::string> &movement)
@@ -849,6 +872,8 @@ static void HandleServerPacket(const std::string &msg)
 		else if (parts.size() >= 2 && parts[1] == "BANNED")
 			wo_native::PushControl(wo_native::InboundOpcode::Banned);
 		else if (parts.size() >= 2 && parts[1] == "NOT_WHITELISTED")
+			wo_native::PushControl(wo_native::InboundOpcode::NotWhitelisted);
+		else if (parts.size() >= 2 && (parts[1] == "AUTH_REQUIRED" || parts[1] == "AUTH_FAILED"))
 			wo_native::PushControl(wo_native::InboundOpcode::NotWhitelisted);
 		CloseOnlineSession();
 		return;
@@ -1099,6 +1124,7 @@ static void connectServer()
 		serverEndpoint = *resolver.resolve(asio::ip::udp::v4(), ip, port).begin();
 		theSocket.connect(serverEndpoint);
 		wo_native::SetConnected(true);
+		SendAuthIfConfigured();
 
 		// These workers are process-lifetime. Detaching avoids std::thread global
 		// destruction/join work during DLL_PROCESS_DETACH. The module is pinned, so
@@ -1142,6 +1168,7 @@ static void initScript()
 
 			ip = xml.child("ServerIP").text().as_string();
 			port = xml.child("Port").text().as_string();
+			authToken = xml.child("AuthToken").text().as_string();
 
 			if (username.length() < 2 || username == "none")
 				username = "Player";

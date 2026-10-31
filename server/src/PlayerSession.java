@@ -29,6 +29,9 @@ public class PlayerSession
     public volatile float authHealth = CombatAuthorityRules.DEFAULT_HEALTH;
     public volatile long lastAuthHitNanos = 0L;
 
+    /** Shared-secret UDP auth (R5). True when server token empty or AUTH succeeded. */
+    public volatile boolean authenticated = true;
+
     public PlayerSession(int playerId, String username, ClientEndpoint endpoint, long lastSeen)
     {
         this.playerId = playerId;

@@ -4,6 +4,10 @@
 port=40000
 whitelist=false
 
+# Optional shared secret (R5). When set, clients must send AUTH with the same token
+# (config.xml <AuthToken>) before MOVE/UPDATE/etc are accepted.
+# authToken=
+
 # Optional HTTP status (SVG/JSON). Default status port is 40001.
 svgEnabled=false
 # svgPort=40001

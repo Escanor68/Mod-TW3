@@ -29,11 +29,13 @@ Example client config:
 	<Username>Player</Username>
 	<ServerIP>100.x.y.z</ServerIP>
 	<Port>40000</Port>
+	<!-- Optional; required when server.properties authToken is set -->
+	<AuthToken></AuthToken>
 </Config>
 ```
 
-Files beside the JAR (created/read by the server): `server.properties`, `banned-players.json`, `whitelisted-players.json`.  
-See `server/server.properties.example` in this repo.
+Files beside the JAR (created/read by the server): `server.properties`, `banned-players.json`, `whitelisted-players.json`, `player-snapshots.tsv`.  
+See `server/server.properties.example` in this repo. For public VPS, set a non-empty `authToken` (R5).
 
 ## Path A — Tailscale (recommended for a small group)
 
