@@ -18,8 +18,6 @@ This repository (`main`) carries the WitcherOnline line plus an **MMORPG-path** 
 3. Host friends outside your LAN: [docs/hosting/dedicated-hosting.md](docs/hosting/dedicated-hosting.md) (Tailscale or VPS).
 4. Build the Java server from source: [server/README.md](server/README.md) (**JDK 21+**).
 
-Special thanks to Werasik2aa for [Witcher3-Multiplayer](https://github.com/werasik2aa/Witcher3-Multiplayer).
-
 ## Game version (Next Gen)
 
 **Target:** *The Witcher 3: Wild Hunt* **Next Gen v4.04+** (Steam / GOG / Epic). Upstream does **not** support Classic or builds older than v4.04 (REDkit June 2024).
@@ -120,15 +118,6 @@ Operator / developer notes under `docs/hosting/`:
 
 Public hosts should set `authToken` in `server.properties` and matching `<AuthToken>` in client `config.xml`.
 
-## Socials
+## License
 
-- [Discord](https://discord.gg/AGXXvGNnH8)
-- [Wolven Workshop](https://discord.com/invite/RzkhYYr7fk) (`#rejuvenate-rock-farm`)
-- [Wiki](https://rejuvenate.gitbook.io/witcheronline)
-- [YouTube](https://www.youtube.com/@rejuvenate7/videos)
-- [Donate](https://ko-fi.com/rejuvenate)
-
-## Credits
-- [rejuvenate7](https://github.com/rejuvenate7) — Lead developer
-- [x4lva](https://github.com/x4lva) — Co-developer, Gwent sync
-- [Flawkee](https://github.com/flawkee) — Co-developer, Native hook / NPC sync
+This repository ships under **GPL-3.0** (see [`LICENSE`](LICENSE)). That file was **not** changed in the MMORPG-path / Next Gen README updates; it remains the upstream license already on `main`.
