@@ -7,7 +7,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 
 | ID | Risk | Feature | Severity | Status | Mitigation / resolution |
 |----|------|---------|----------|--------|-------------------------|
-| R1 | Home host unreachable (CGNAT / no public IP) | F0 dedicated-hosting | high | mitigating | Document Tailscale + VPS; local smoke only — live peer join still operator-owned |
+| R1 | Home host unreachable (CGNAT / no public IP) | F0 dedicated-hosting | high | accepted | Tailscale/VPS documented; live peer reachability remains operator-owned (no code can fix CGNAT) |
 | R2 | JDK mismatch: repo needs 21+, some hosts only have 8 | F0 / build | medium | resolved | Shared `require-jdk21.sh` gates all server test scripts; docs call out JDK 21+ |
 | R3 | Ban is IP-only; username spoof after IP change | F1 session-identity | medium | accepted | Documented in session-identity.md; full accounts deferred to F5 |
 | R4 | Whitelist on/off was runtime-only (lost on restart) | F1 session-identity | medium | resolved | `whitelist on/off` now persists to `server.properties` |
@@ -35,6 +35,7 @@ Status: `open` | `mitigating` | `resolved` | `accepted`
 - 2026-10-31 — **R9 resolved**: F6 interest slice accepted; residual multi-process shards remain out of scope.
 - 2026-10-31 — **R10 resolved**: status HTTP defaults to loopback bind (`svgBind`).
 - 2026-10-31 — **R2 resolved**: `require-jdk21.sh` fail-fast on JDK &lt; 21 for all `run-*-tests.sh`.
+- 2026-10-31 — **R1 accepted**: CGNAT/public reachability is an operator path (Tailscale/VPS); residual accepted for F0.
 - _(append dated entries when marking resolved/accepted)_
 
 ## How to use

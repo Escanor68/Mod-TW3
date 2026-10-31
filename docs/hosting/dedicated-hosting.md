@@ -87,6 +87,10 @@ Party-scoped world slice: [party-world-slice.md](party-world-slice.md).
 
 Inventory / design notes: [npc-presence-sync.md](npc-presence-sync.md).
 
+## Residual risk (R1)
+
+Home CGNAT / no public IP cannot be fixed in-mod. Operators must use Tailscale, a VPS, or port-forward. This residual is **accepted** for F0.
+
 ## Out of scope (later ODD features)
 
 NPC sync, combat authority, shared persistence, sharding — see `odd/tasks/`.
