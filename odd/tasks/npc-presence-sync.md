@@ -14,7 +14,7 @@ Acceptance: two clients in range see the same target NPC appear/move for the agr
 
 ## Tasks
 
-- [x] T1 (S2, S4) — Map native hook surface and current opcodes — route: inline — status: done — commit: pending
+- [x] T1 (S2, S4) — Map native hook surface and current opcodes — route: inline — status: done — commit: 3fb23f9
   - Inventory: `docs/hosting/npc-presence-sync.md`. `presence` tag ≠ NPC sync; server only MOVE/UPDATE1–4.
 - [ ] T2 (S1, S3) — Product refine: party-only vs proximity global (blocking decision before code) — route: inline — status: blocked — commit: —
 - [ ] T3 (S3, S4) — Protocol + server relay for NPC presence slice — route: inline — status: pending — commit: —
