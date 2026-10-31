@@ -20,6 +20,21 @@ This repository (`main`) carries the WitcherOnline line plus an **MMORPG-path** 
 
 Special thanks to Werasik2aa for [Witcher3-Multiplayer](https://github.com/werasik2aa/Witcher3-Multiplayer).
 
+## Game version (Next Gen)
+
+**Target:** *The Witcher 3: Wild Hunt* **Next Gen v4.04+** (Steam / GOG / Epic). Upstream does **not** support Classic or builds older than v4.04 (REDkit June 2024).
+
+| Check | Status |
+|-------|--------|
+| Upstream requirement | Next Gen **4.04+** ([Getting Started](https://rejuvenate.gitbook.io/witcheronline/guides/getting-started)) |
+| Classic / pre-4.04 | Unsupported |
+| Required mods | [Community Patch – Shared Imports (Next Gen)](https://rejuvenate.gitbook.io/witcheronline/guides/client-setup/required-mods), [Custom Player Characters](https://www.nexusmods.com/witcher3/mods/5940), [Chill Out (Next Gen 4.04)](https://www.nexusmods.com/witcher3/mods/6402) — install manually, then Script Merger |
+| This repo layout | Next Gen style (`mods/` + `dlc/` + `user_config_matrix`); client hooks via **WitcherNativeBridge** (x64) |
+| Server (Java) | Game-version agnostic; still **JDK 21+** |
+| In-game dual-client proof | Not run in this environment — verify on your 4.04+ install |
+
+Nexus may omit a “Remastered Compatible” store tag; that does not override the wiki/Nexus description requiring Next Gen 4.04+.
+
 ## Features / Playguide
 
 Full movement, combat, and appearance sync. Emotes and chat via player menu or console. Morphs, horses, boats, Gwent (Timed/Normal + bets), parties (time / weather / dialog).
