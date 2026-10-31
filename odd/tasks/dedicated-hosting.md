@@ -14,10 +14,10 @@ Acceptance: two machines not on the same LAN join the same server session (or Ta
 
 ## Tasks
 
-- [x] T1 (S1–S3) — Document current listen/connect path (`WitcherServer` + `config.xml`) — route: inline — status: done — commit: pending
-- [x] T2 (S1, S4, S5) — Author runbook for Tailscale path — route: inline — status: done — commit: pending
-- [x] T3 (S1, S4, S5) — Author runbook for VPS + UDP 40000 firewall — route: inline — status: done — commit: pending
-- [x] T4 (S1, S4) — Smoke-verify join from a non-LAN peer (or recorded Tailscale proof) — route: inline — status: partial — commit: pending
+- [x] T1 (S1–S3) — Document current listen/connect path (`WitcherServer` + `config.xml`) — route: inline — status: done — commit: ae1c1d5
+- [x] T2 (S1, S4, S5) — Author runbook for Tailscale path — route: inline — status: done — commit: ae1c1d5
+- [x] T3 (S1, S4, S5) — Author runbook for VPS + UDP 40000 firewall — route: inline — status: done — commit: ae1c1d5
+- [x] T4 (S1, S4) — Smoke-verify join from a non-LAN peer (or recorded Tailscale proof) — route: inline — status: partial — commit: ae1c1d5
   - Evidence: `docs/hosting/smoke-local.sh` → PASS (config shape + UDP 40000 bind). Peer TW3 join not run here (no JDK 21 JAR build without sudo; no second game client).
 
 ## Log
